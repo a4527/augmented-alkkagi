@@ -18,4 +18,4 @@ worklog의 해당 작업 절 링크와 수용 기준 충족 여부 요약:
 
 PRD·DESIGN 상세·DECISIONS/ADR·README 등 변경한 기준 문서와 갱신 이유:
 
-해당할 때 PROGRESS·CHANGELOG 갱신과 병합 후 TASKS 상태 반영:
+해당할 때 PROGRESS·CHANGELOG 갱신, 마무리 PR이면 TASKS 완료 표시:

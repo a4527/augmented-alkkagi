@@ -14,7 +14,7 @@
 | 진행 중 | 범위에 따라 수정·합의·검증 중 |
 | 막힘 | 진행 불가 조건과 해소 조건을 해당 작업에 기록 |
 | 리뷰 중 | 검증 근거와 변경을 PR로 제출하고 리뷰를 기다림 |
-| 완료 | 수용 기준 충족, 검증 근거 연결, 리뷰(1인 개발은 [자기 검토](CONTRIBUTING.md#자기-검토)) 후 기준 브랜치 병합 |
+| 완료 | 수용 기준 충족, 검증 근거 연결, 리뷰(1인 개발은 [자기 검토](CONTRIBUTING.md#자기-검토)) 후 기준 브랜치 병합. 1인 개발은 마무리 PR에서 완료로 바꾸고 병합한다 |
 | 취소 | 결정 철회 등으로 하지 않기로 함. 근거 DEC와 사유를 해당 작업에 기록 |
 
 우선순위는 P0(현재 진행을 막는 작업), P1(다음 착수 대상), P2(이후 검토)로 표시한다. 우선순위·작업 등록은 미정 제품 정책·기술안을 승인하는 행위가 아니다.
@@ -24,7 +24,7 @@
 | ID | 작업 | 우선순위 | 의존성 | 상태 | 담당 | Issue·PR |
 | --- | --- | --- | --- | --- | --- | --- |
 | [DOC-013](#doc-013-개인-프로젝트-전환) | 개인 프로젝트 전환 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/a4527/augmented-alkkagi/pull/1) |
-| [DOC-014](#doc-014-팀-시절-작업진행-기록-분리) | 팀 시절 작업·진행 기록 분리 | P1 | DOC-013 | 리뷰 중 | Claude — 사용자 요청 수행 | [PR #3](https://github.com/a4527/augmented-alkkagi/pull/3) |
+| [DOC-014](#doc-014-팀-시절-작업진행-기록-분리) | 팀 시절 작업·진행 기록 분리 | P1 | DOC-013 | 완료 | Claude — 사용자 요청 수행 | [PR #3](https://github.com/a4527/augmented-alkkagi/pull/3) |
 
 ## 새 작업 등록 양식
 
@@ -70,10 +70,10 @@ Issue·PR: [PR #1](https://github.com/a4527/augmented-alkkagi/pull/1)
 ## DOC-014 팀 시절 작업·진행 기록 분리
 
 우선순위: P1
-상태: 리뷰 중
+상태: 완료
 담당: Claude — 사용자 요청 수행
 의존성: DOC-013
-범위: 문서를 읽는 컨텍스트를 줄이려고 팀 시절 TASKS·PROGRESS를 `docs/legacy/`로 옮겨 동결하고, TASKS·PROGRESS를 개인 프로젝트 기준으로 짧게 다시 쓴다. 진행 중이던 팀 시절 작업 12건은 이어 가지 않고 닫는다. 다른 문서의 링크를 옮긴 위치로 바꾼다. DECISIONS는 옮기지 않는다.
+범위: 문서를 읽는 컨텍스트를 줄이려고 팀 시절 TASKS·PROGRESS를 `docs/legacy/`로 옮겨 동결하고, TASKS·PROGRESS를 개인 프로젝트 기준으로 짧게 다시 쓴다. 진행 중이던 팀 시절 작업 12건은 이어 가지 않고 닫는다. 다른 문서의 링크를 옮긴 위치로 바꾼다. DECISIONS는 옮기지 않는다. 사용자 후속 요청으로 병합 후 완료 반영 PR을 없애는 규칙 변경([DEC-093](DECISIONS.md#결정-색인))도 함께 한다.
 관련 문서: [DEC-092](DECISIONS.md#결정-색인), [팀 시절 작업 기록](legacy/TASKS-team.md), [팀 시절 진행 기록](legacy/PROGRESS-team.md), [AGENTS 문서 구조](../AGENTS.md#문서-구조)
 Issue·PR: [PR #3](https://github.com/a4527/augmented-alkkagi/pull/3)
 
@@ -84,6 +84,6 @@ Issue·PR: [PR #3](https://github.com/a4527/augmented-alkkagi/pull/3)
 - [x] PROGRESS를 개인 프로젝트 기준으로 다시 쓰고 팀 시절 내용은 `docs/legacy/PROGRESS-team.md`에 그대로 둔다.
 - [x] AGENTS의 문서 책임 표·구조·작업 규칙에 legacy 위치와 읽기 조건을 적고, DECISIONS에 결정을 기록한다.
 - [x] 저장소 Markdown 전체의 상대 링크·앵커가 깨지지 않고, 과거 기록(이전 worklog·legacy·DEC-001~090)의 TASKS·PROGRESS 링크는 legacy를 가리킨다.
-- [ ] 자기 검토 후 기준 브랜치에 병합됐다.
+- [x] CONTRIBUTING·PR 양식·TASKS 완료 정의를 "마무리 PR에서 완료 표시, 병합 후 완료 반영 PR 없음"으로 고치고 DEC-093을 기록한다.
 
 검증 근거: [2026-11-25 worklog](worklogs/2026-11-25.md#doc-014-팀-시절-작업진행-기록-분리)
