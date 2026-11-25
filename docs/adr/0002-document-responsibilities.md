@@ -32,5 +32,5 @@ DEC ID: [DEC-004](../DECISIONS.md#결정-색인)
 ## 관련 기준과 근거
 
 - [PRD](../PRD.md)·[DESIGN](../DESIGN.md)
-- [DOC-001](../TASKS.md#doc-001-문서-책임과-구조-재편)
+- [DOC-001](../legacy/TASKS-team.md#doc-001-문서-책임과-구조-재편)
 - [검증 근거](../worklogs/2026-10-28.md#doc-001-문서-책임과-구조-재편)

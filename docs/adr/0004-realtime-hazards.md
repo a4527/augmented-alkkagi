@@ -31,4 +31,4 @@ DEC ID: [DEC-016](../DECISIONS.md#결정-색인)
 ## 관련 기준과 근거
 
 - [PRD 방해요소](../PRD.md#방해요소-규칙)
-- [GAME-001](../TASKS.md#game-001-게임-처리-상세-설계-확정), [worklog](../worklogs/2026-10-30.md#game-001-게임-처리-상세-설계-초안)
+- [GAME-001](../legacy/TASKS-team.md#game-001-게임-처리-상세-설계-확정), [worklog](../worklogs/2026-10-30.md#game-001-게임-처리-상세-설계-초안)

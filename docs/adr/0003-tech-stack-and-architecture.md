@@ -74,5 +74,5 @@ DEC ID: [DEC-013](../DECISIONS.md#결정-색인)
 
 - 현행 PRD 절: [비기능 요구사항](../PRD.md#4-비기능-요구사항과-제약), [방해요소 규칙](../PRD.md#방해요소-규칙), [알 떠오름](../PRD.md#알-떠오름), [게임 화면](../PRD.md#게임-화면)
 - 현행 DESIGN 또는 상세 설계 절: [DESIGN](../DESIGN.md), [TECH_STACK](../design/TECH_STACK.md), [GAME](../design/GAME.md), [OPERATIONS](../design/OPERATIONS.md)
-- 작업 ID와 검증 근거(worklog): [DOC-010](../TASKS.md#doc-010-기술-스택과-아키텍처-결정), [2026-10-29 worklog](../worklogs/2026-10-29.md#doc-010-기술-스택과-아키텍처-결정)
+- 작업 ID와 검증 근거(worklog): [DOC-010](../legacy/TASKS-team.md#doc-010-기술-스택과-아키텍처-결정), [2026-10-29 worklog](../worklogs/2026-10-29.md#doc-010-기술-스택과-아키텍처-결정)
 - 무료 플랜 근거: [Render Deploy for Free](https://render.com/docs/free), [Render 변경 기록(WebSocket 메시지도 절전 타이머에 반영)](https://render.com/changelog/free-web-services-now-remain-active-while-receiving-websocket-messages), [Neon Plans](https://neon.com/docs/introduction/plans)

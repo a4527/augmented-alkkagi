@@ -5,8 +5,8 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | 전송 방식: 계정·조회는 REST, 방·대전은 Socket.IO, 세션 쿠키 공유 ([DEC-013](../DECISIONS.md#결정-색인)) |
-| 현재 구현 | `shared`의 Zod 스키마와 이벤트 필드 타입([IMPL-002](../TASKS.md#impl-002-game-core), PR 병합 전). 서버·클라이언트 연동은 없음. 방 이벤트·`GET /api/rooms`는 서버가 구현했다(`packages/server/src/rooms`, [IMPL-008](../TASKS.md#impl-008-로비방-서버)). 경기 이벤트의 서버 연동은 IMPL-009 |
-| 확정 (API-001·API-002 완료) | REST 경로 8개와 요청·응답 필드, 방 목록 새로고침 조회, `sim:result` 삭제, Socket.IO 이벤트 필드, 오류 형식·코드, 이벤트 순서, 상대 비공개 점검, 이름·식별자 확인, 본인 private 뷰의 게이지·쿨타임 필드 ([API-001](../TASKS.md#api-001-api실시간-이벤트-계약-확정), [API-002](../TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정)) |
+| 현재 구현 | `shared`의 Zod 스키마와 이벤트 필드 타입([IMPL-002](../legacy/TASKS-team.md#impl-002-game-core), PR 병합 전). 서버·클라이언트 연동은 없음. 방 이벤트·`GET /api/rooms`는 서버가 구현했다(`packages/server/src/rooms`, [IMPL-008](../legacy/TASKS-team.md#impl-008-로비방-서버)). 경기 이벤트의 서버 연동은 IMPL-009 |
+| 확정 (API-001·API-002 완료) | REST 경로 8개와 요청·응답 필드, 방 목록 새로고침 조회, `sim:result` 삭제, Socket.IO 이벤트 필드, 오류 형식·코드, 이벤트 순서, 상대 비공개 점검, 이름·식별자 확인, 본인 private 뷰의 게이지·쿨타임 필드 ([API-001](../legacy/TASKS-team.md#api-001-api실시간-이벤트-계약-확정), [API-002](../legacy/TASKS-team.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정)) |
 | 미정 | 없음. 발사 각도 범위는 (−π, π]로 확정([DEC-061](../DECISIONS.md#결정-색인)) |
 
 상위 구조는 [DESIGN](../DESIGN.md), 제품 동작은 [PRD](../PRD.md)를 따른다. 이 문서는 전송 방식·메시지·요청·응답·오류·검증 경계를 관리한다. 선택 이유는 [결정 기록](../DECISIONS.md)에 둔다. 아래 필드는 `shared`의 Zod 스키마로 옮길 수 있는 수준으로 적었고, 필드 이름은 `camelCase`다.
@@ -17,16 +17,16 @@
 
 | 타입 | 값·필드 | 비고 |
 | --- | --- | --- |
-| `Appearance` | `{ headShape, hair, eyebrows, eyes, nose, lips, skinTone, glasses, hat, outfit }`, 각 값은 정수 0~4 | 사람 아바타 외형([DEC-054](../DECISIONS.md#결정-색인)·[DEC-059](../DECISIONS.md#결정-색인), `glasses`·`hat`·`outfit`은 [DEC-078](../DECISIONS.md#결정-색인)으로 더했다, 구현 [IMPL-024](../TASKS.md#impl-024-아바타-꾸미기-항목-확장안경모자옷)). 고정 기본 외형은 모든 값 0. 머리색은 `hair` 선택지에 딸려 있다. 요청 검사는 `shared`의 `AppearanceSchema`(10항목 모두 필요, 여분 필드 거부)이고, 선택지 모양 정의(번호 → 부품)는 같은 파일(`avatar.ts`)의 `AVATAR_PARTS` 한 곳에 두고 3D·SVG가 같이 쓴다. 저장값을 읽을 때는 없는 필드·범위 밖 값을 0으로 읽는다(`normalizeAppearance`). 항목이 늘면 필드를 더한다. 동물 6종 `CharacterId`는 [IMPL-018](../TASKS.md#impl-018-사람-아바타-구현)에서 지웠다 |
+| `Appearance` | `{ headShape, hair, eyebrows, eyes, nose, lips, skinTone, glasses, hat, outfit }`, 각 값은 정수 0~4 | 사람 아바타 외형([DEC-054](../DECISIONS.md#결정-색인)·[DEC-059](../DECISIONS.md#결정-색인), `glasses`·`hat`·`outfit`은 [DEC-078](../DECISIONS.md#결정-색인)으로 더했다, 구현 [IMPL-024](../legacy/TASKS-team.md#impl-024-아바타-꾸미기-항목-확장안경모자옷)). 고정 기본 외형은 모든 값 0. 머리색은 `hair` 선택지에 딸려 있다. 요청 검사는 `shared`의 `AppearanceSchema`(10항목 모두 필요, 여분 필드 거부)이고, 선택지 모양 정의(번호 → 부품)는 같은 파일(`avatar.ts`)의 `AVATAR_PARTS` 한 곳에 두고 3D·SVG가 같이 쓴다. 저장값을 읽을 때는 없는 필드·범위 밖 값을 0으로 읽는다(`normalizeAppearance`). 항목이 늘면 필드를 더한다. 동물 6종 `CharacterId`는 [IMPL-018](../legacy/TASKS-team.md#impl-018-사람-아바타-구현)에서 지웠다 |
 | `BoardId` | `standard`(기본판)·`circle`(원형판) | [판 목록](../PRD.md#판-board). 판이 늘면 값을 추가한다 |
-| `ThemeId` | `bar`(바, 기본)·`rooftop`(밤 옥상)·`classroom`(교실)·`beach`(해변) | [방 테마](../PRD.md#방-생성)([DEC-052](../DECISIONS.md#결정-색인)·[DEC-053](../DECISIONS.md#결정-색인)). 장면 표시에만 쓴다. `game-core`(`Game`)에는 넘기지 않고 `game-runtime`은 닉네임처럼 `game:start`에 담기만 한다. 테마가 늘면 값을 추가한다. 스키마는 `shared`의 `ThemeIdSchema`([IMPL-015](../TASKS.md#impl-015-방-테마-구현)) |
+| `ThemeId` | `bar`(바, 기본)·`rooftop`(밤 옥상)·`classroom`(교실)·`beach`(해변) | [방 테마](../PRD.md#방-생성)([DEC-052](../DECISIONS.md#결정-색인)·[DEC-053](../DECISIONS.md#결정-색인)). 장면 표시에만 쓴다. `game-core`(`Game`)에는 넘기지 않고 `game-runtime`은 닉네임처럼 `game:start`에 담기만 한다. 테마가 늘면 값을 추가한다. 스키마는 `shared`의 `ThemeIdSchema`([IMPL-015](../legacy/TASKS-team.md#impl-015-방-테마-구현)) |
 | `Seat` | `0` 또는 `1` | 경기 안 좌석. `users.id`를 쓰지 않는다 ([DEC-030](../DECISIONS.md#결정-색인)) |
-| `HazardKind` | `board_spin`(판 돌리기)·`flashlight`(후레쉬)·`water_gun`(물총)·`desk_shake`(책상 흔들기)·`wall`(벽)·`sticky`(끈끈이)·`stun`(기절)·`bar_speed`(세기 막대 속도 조절)·`wind`(바람) | [방해요소](../PRD.md#방해요소-규칙). [DEC-055](../DECISIONS.md#결정-색인)([IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체))로 `magnet`(자석)·`gravity_zone`(중력 구역)·`ice_floor`(미끄럼 장판)·`decoy`(분신술)·`fake_wall`(가짜벽)·`heavy_stones`(알 무게 변화)·`reverse_zone`(방향 반전 구역)·`mine`(폭탄)·`pit`(바닥 없어지기)·`moving_wall`(이동 장애물)을 더한다. `desk_shake`는 지급하지 않지만 기존 이벤트 파싱을 위해 값은 남긴다 |
+| `HazardKind` | `board_spin`(판 돌리기)·`flashlight`(후레쉬)·`water_gun`(물총)·`desk_shake`(책상 흔들기)·`wall`(벽)·`sticky`(끈끈이)·`stun`(기절)·`bar_speed`(세기 막대 속도 조절)·`wind`(바람) | [방해요소](../PRD.md#방해요소-규칙). [DEC-055](../DECISIONS.md#결정-색인)([IMPL-016](../legacy/TASKS-team.md#impl-016-방해요소-10종-추가와-턴-교체))로 `magnet`(자석)·`gravity_zone`(중력 구역)·`ice_floor`(미끄럼 장판)·`decoy`(분신술)·`fake_wall`(가짜벽)·`heavy_stones`(알 무게 변화)·`reverse_zone`(방향 반전 구역)·`mine`(폭탄)·`pit`(바닥 없어지기)·`moving_wall`(이동 장애물)을 더한다. `desk_shake`는 지급하지 않지만 기존 이벤트 파싱을 위해 값은 남긴다 |
 | `Record` | `{ totalGames, wins, losses, draws }` | `draws = totalGames - wins - losses`로 서버가 계산한다. `shared`의 타입 이름은 내장 `Record`와 겹치지 않게 `PlayerRecord`다. 승률은 클라이언트가 계산한다 |
 | `Member` | `{ nickname, appearance: Appearance, record: Record }` | 사용자 번호는 넣지 않는다 |
 | `Me` | `{ nickname, appearance: Appearance, record: Record }` | `GET /api/me`·로그인 응답 |
 
-꾸미기 창의 저장 버튼이 `PATCH /api/me/appearance`를 한 번 보낸다. AI 대전의 AI 좌석 외형은 브라우저가 대전을 열 때 무작위로 만들어 `game:start`에 담고 재도전에서는 그대로 쓴다. 로컬 2인은 계정이 없어 두 사람에게 서로 다른 고정 외형을 쓴다([DEC-059](../DECISIONS.md#결정-색인), [IMPL-018](../TASKS.md#impl-018-사람-아바타-구현)).
+꾸미기 창의 저장 버튼이 `PATCH /api/me/appearance`를 한 번 보낸다. AI 대전의 AI 좌석 외형은 브라우저가 대전을 열 때 무작위로 만들어 `game:start`에 담고 재도전에서는 그대로 쓴다. 로컬 2인은 계정이 없어 두 사람에게 서로 다른 고정 외형을 쓴다([DEC-059](../DECISIONS.md#결정-색인), [IMPL-018](../legacy/TASKS-team.md#impl-018-사람-아바타-구현)).
 
 ### REST API
 
@@ -80,13 +80,13 @@
 | `HAZARD_COOLDOWN` | 쿨타임 중인 쿨타임형 방해요소를 사용함 ([DEC-031](../DECISIONS.md#결정-색인)) |
 | `HAZARD_OVERHEATED` | 과열 중에 피로도 게이지형 방해요소를 사용함 ([DEC-031](../DECISIONS.md#결정-색인)) |
 | `HAZARD_INVALID_TARGET` | 벽·끈끈이의 위치·방향이 없거나 판 밖이거나 알·기존 벽·끈끈이와 겹침 ([GAME 방해요소별 처리](GAME.md#방해요소별-처리)). 추가 10종의 거부 조건은 [추가 방해요소 10종 필드](#추가-방해요소-10종-필드-haz-001) |
-| `HAZARD_NOT_USABLE` | 랜덤형 방해요소를 직접 사용함 ([PRD 사용](../PRD.md#사용)). 턴당 1회형을 같은 턴에 다시 사용함([IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체)). 경기 시작 전·종료 후 입력은 `GAME_NOT_ACTIVE`다 ([GAME 상태 전이](GAME.md#상태-전이와-순서)) |
+| `HAZARD_NOT_USABLE` | 랜덤형 방해요소를 직접 사용함 ([PRD 사용](../PRD.md#사용)). 턴당 1회형을 같은 턴에 다시 사용함([IMPL-016](../legacy/TASKS-team.md#impl-016-방해요소-10종-추가와-턴-교체)). 경기 시작 전·종료 후 입력은 `GAME_NOT_ACTIVE`다 ([GAME 상태 전이](GAME.md#상태-전이와-순서)) |
 | `REMATCH_NOT_AVAILABLE` | 결과 화면이 아니거나 재도전 15초가 지났거나 상대가 나간 뒤의 `rematch:request` |
 | `OUT_OF_REACH` | 손이 닿는 거리 밖의 알로 발사함 ([GAME 방해요소 수치](GAME.md#방해요소-수치)의 손이 닿는 거리, [DEC-036](../DECISIONS.md#결정-색인)). [DEC-063](../DECISIONS.md#결정-색인) 확정 |
-| `EMOTE_COOLDOWN` | 감정표현 공통 쿨타임 안의 `emote:send` ([IMPL-017](../TASKS.md#impl-017-감정표현-구현)) |
+| `EMOTE_COOLDOWN` | 감정표현 공통 쿨타임 안의 `emote:send` ([IMPL-017](../legacy/TASKS-team.md#impl-017-감정표현-구현)) |
 | `BOARD_ROTATE_NOT_ALLOWED` | 조준 단계가 아니거나(알 이동 중 등) 기절 중의 `board:rotate` ([DEC-036](../DECISIONS.md#결정-색인)). 상대 턴은 `NOT_YOUR_TURN`. [DEC-063](../DECISIONS.md#결정-색인) 확정 |
 
-방해요소 사용 거부는 `STALE_HAZARD`와 `HAZARD_*` 4종으로 응답한다. "효과가 진행 중"이라는 이유의 거부는 없다([DEC-031](../DECISIONS.md#결정-색인)). `HAZARD_*`와 이 절의 새 코드 이름은 개발자 B가 정했고 개발자 A가 GAME·LOCAL·OPERATIONS와 대조해 확인했다([API-002](../TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정)). 목록은 이 절 한 곳에서 관리한다.
+방해요소 사용 거부는 `STALE_HAZARD`와 `HAZARD_*` 4종으로 응답한다. "효과가 진행 중"이라는 이유의 거부는 없다([DEC-031](../DECISIONS.md#결정-색인)). `HAZARD_*`와 이 절의 새 코드 이름은 개발자 B가 정했고 개발자 A가 GAME·LOCAL·OPERATIONS와 대조해 확인했다([API-002](../legacy/TASKS-team.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정)). 목록은 이 절 한 곳에서 관리한다.
 
 ### Socket.IO 이벤트
 
@@ -137,11 +137,11 @@
 | `room:state` (S → C) | — | `{ roomId, title, isPublic, pieceCount, board, theme, status, host: Member, guest: Member \| null, isHost, code? }`. `code`는 **방장에게만** 담고 상대·목록에는 넣지 않는다. 상대 입장(곧바로 시작해 `status`가 `playing`)·퇴장(`guest`가 비고 `waiting`)·재도전 만료 때 방 안 사용자 각각에게 보낸다. 방장 혼자 있으면 `guest`가 `null`이다 |
 | `room:closed` (S → C) | — | `{ roomId, reason: "host_left" \| "rematch_timeout" }`. `roomId`는 닫힌(또는 본인이 나간) 방이다. `host_left`는 방장이 나가 방이 닫힘, `rematch_timeout`은 재도전 15초 동안 누르지 않아 서버가 나가기로 처리한 사람 본인에게 보낸다. 방장이 누르지 않아 방이 닫힐 때 참여자가 누르지 않았어도(두 사람 모두 안 누름) 참여자에게도 `rematch_timeout`을 보낸다([DEC-041](../DECISIONS.md#결정-색인)). 받은 클라이언트는 로비로 이동한다 |
 
-- 입장은 서버가 `rooms`의 조건부 갱신(참여자가 비어 있고 상태가 `waiting`이면 `guest_id`를 채우고 같은 문장에서 `playing`으로 바꿈)으로 처리해 동시 입장 중 한 명만 성공시킨다. 시작 버튼·`room:start`·카운트다운은 없다([DEC-040](../DECISIONS.md#결정-색인)) ([DB-001](../TASKS.md#db-001-db-스키마-확정)). 목록이 오래된 채 입장해도 이 시점에 최신 상태로 다시 검사한다.
+- 입장은 서버가 `rooms`의 조건부 갱신(참여자가 비어 있고 상태가 `waiting`이면 `guest_id`를 채우고 같은 문장에서 `playing`으로 바꿈)으로 처리해 동시 입장 중 한 명만 성공시킨다. 시작 버튼·`room:start`·카운트다운은 없다([DEC-040](../DECISIONS.md#결정-색인)) ([DB-001](../legacy/TASKS-team.md#db-001-db-스키마-확정)). 목록이 오래된 채 입장해도 이 시점에 최신 상태로 다시 검사한다.
 - 코드 틀림 횟수 제한은 두지 않는다. 대신 `room:join`에 사용자당 분당 30회 빈도 제한을 둔다 ([AUTH](AUTH.md#인증-요청-빈도-제한)).
 - 비공개 방 코드는 방장에게만 보이며 `room:state`를 포함한 상대·목록 응답에는 넣지 않는다.
 - AI 대전은 방 이벤트를 쓰지 않는다. `room:create`는 PvP만 받는다.
-- 구현에서 정한 세부([IMPL-008](../TASKS.md#impl-008-로비방-서버), [DEC-063](../DECISIONS.md#결정-색인) 확정):
+- 구현에서 정한 세부([IMPL-008](../legacy/TASKS-team.md#impl-008-로비방-서버), [DEC-063](../DECISIONS.md#결정-색인) 확정):
   - `room:join`의 `code`는 형식을 검사하지 않는다. 형식이 틀린 코드도 맞지 않는 코드와 같이 `INVALID_CODE`다. 비공개 방은 코드가 틀리면 방이 게임 중이어도 `INVALID_CODE`를 먼저 돌려줘 방 상태를 알려 주지 않는다.
   - 소켓 ack의 `INTERNAL_ERROR`: 처리하지 못한 서버 오류는 `{ ok: false, error: { code: "INTERNAL_ERROR" } }`로 응답한다(REST의 `500`과 같은 코드).
   - 연결이 끊기면 `room:leave`와 같게 처리한다(방장이면 방 삭제, 참여자면 자리 비움). 이 소켓이 방을 만들거나 입장한 적이 있을 때만 처리한다.
@@ -257,7 +257,7 @@ sequenceDiagram
 
 ### 추가 방해요소 10종 필드 (HAZ-001)
 
-계약 확정([DEC-063](../DECISIONS.md#결정-색인))·구현([IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체), [DEC-055](../DECISIONS.md#결정-색인)·[DEC-057](../DECISIONS.md#결정-색인)). 효과 처리와 수치는 [GAME 추가 방해요소 10종](GAME.md#추가-방해요소-10종과-턴-교체-haz-001)을 따른다. 위 표와 다르면 이 절이 우선한다.
+계약 확정([DEC-063](../DECISIONS.md#결정-색인))·구현([IMPL-016](../legacy/TASKS-team.md#impl-016-방해요소-10종-추가와-턴-교체), [DEC-055](../DECISIONS.md#결정-색인)·[DEC-057](../DECISIONS.md#결정-색인)). 효과 처리와 수치는 [GAME 추가 방해요소 10종](GAME.md#추가-방해요소-10종과-턴-교체-haz-001)을 따른다. 위 표와 다르면 이 절이 우선한다.
 
 | 항목 | 변경 |
 | --- | --- |
@@ -277,7 +277,7 @@ sequenceDiagram
 
 ### 감정표현 필드 (EMOTE-001)
 
-계약 확정([DEC-063](../DECISIONS.md#결정-색인)). 로컬·AI는 구현했고 서버 Socket.IO 연결·온라인 확인은 후속이다([DEC-065](../DECISIONS.md#결정-색인), [IMPL-017](../TASKS.md#impl-017-감정표현-구현)). 제품 규칙은 [PRD 감정표현](../PRD.md#감정표현-dec-056)을 따른다. 감정표현은 경기 상태(`Game`)를 바꾸지 않으므로 `game-core`에 넣지 않고 `game-runtime`이 쿨타임 검사와 중계를 맡는다. 그래서 온라인 서버·로컬 2인 SharedWorker·AI Worker가 같은 규칙을 쓴다.
+계약 확정([DEC-063](../DECISIONS.md#결정-색인)). 로컬·AI는 구현했고 서버 Socket.IO 연결·온라인 확인은 후속이다([DEC-065](../DECISIONS.md#결정-색인), [IMPL-017](../legacy/TASKS-team.md#impl-017-감정표현-구현)). 제품 규칙은 [PRD 감정표현](../PRD.md#감정표현-dec-056)을 따른다. 감정표현은 경기 상태(`Game`)를 바꾸지 않으므로 `game-core`에 넣지 않고 `game-runtime`이 쿨타임 검사와 중계를 맡는다. 그래서 온라인 서버·로컬 2인 SharedWorker·AI Worker가 같은 규칙을 쓴다.
 
 | 항목 | 내용 |
 | --- | --- |
@@ -319,7 +319,7 @@ sequenceDiagram
 
 ## 계약 확정 전 확인할 항목
 
-- (해소: 추가 방해요소 10종·감정표현·사람 아바타 API는 [DEC-063](../DECISIONS.md#결정-색인)로 확정. 구현은 [IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체)·[IMPL-017](../TASKS.md#impl-017-감정표현-구현)·[IMPL-018](../TASKS.md#impl-018-사람-아바타-구현))
+- (해소: 추가 방해요소 10종·감정표현·사람 아바타 API는 [DEC-063](../DECISIONS.md#결정-색인)로 확정. 구현은 [IMPL-016](../legacy/TASKS-team.md#impl-016-방해요소-10종-추가와-턴-교체)·[IMPL-017](../legacy/TASKS-team.md#impl-017-감정표현-구현)·[IMPL-018](../legacy/TASKS-team.md#impl-018-사람-아바타-구현))
 - 인증 전달·실패 응답·권한 검사 위치: [인증 설계](AUTH.md)
 - (해소: DEC-036의 `board:rotate`·`hazard:aim`·`aim:update`/`aim:state`, `OUT_OF_REACH`·`BOARD_ROTATE_NOT_ALLOWED`, `hazard:use` target의 `h`, 효과 params의 `aimX`·`aimY`·`aimH`·`coverage`, private `blind.coverage`는 [DEC-063](../DECISIONS.md#결정-색인)로 확정. 서버는 IMPL-009에서 이미 구현했다. 스키마는 `packages/shared/src/protocol.ts`)
 - 호환성·버전 변경

@@ -5,8 +5,8 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | 세션 쿠키 인증(express-session + connect-pg-simple), argon2id(@node-rs/argon2), Zod 입력 검증 ([DEC-013](../DECISIONS.md#결정-색인)). IP당 인증 요청 제한([DEC-025](../DECISIONS.md#결정-색인)). 세션 만료·비밀번호 변경 시 다른 세션 종료([DEC-028](../DECISIONS.md#결정-색인)) |
-| 현재 구현 | 가입·로그인·로그아웃·`GET /api/me`·비밀번호 변경·캐릭터 변경 API, 세션, IP당 빈도 제한, argon2id, Socket.IO 연결 인증·중복 접속 대체(`packages/server/src/auth`·`realtime`, [IMPL-007](../TASKS.md#impl-007-인증)). 기권 명령 변환은 IMPL-009 |
-| 확정 (AUTH-001 완료) | 아래 [AUTH-001](../TASKS.md#auth-001-인증-상세-설계-확정) 세부 설정, 인증 요청 빈도 제한의 한도·응답 형식, 검증 경계 |
+| 현재 구현 | 가입·로그인·로그아웃·`GET /api/me`·비밀번호 변경·캐릭터 변경 API, 세션, IP당 빈도 제한, argon2id, Socket.IO 연결 인증·중복 접속 대체(`packages/server/src/auth`·`realtime`, [IMPL-007](../legacy/TASKS-team.md#impl-007-인증)). 기권 명령 변환은 IMPL-009 |
+| 확정 (AUTH-001 완료) | 아래 [AUTH-001](../legacy/TASKS-team.md#auth-001-인증-상세-설계-확정) 세부 설정, 인증 요청 빈도 제한의 한도·응답 형식, 검증 경계 |
 | 미정 | 없음. 해시 시간은 구현 때 측정해 파라미터를 조정한다 |
 
 제품의 가입·로그인·중복 접속·정보 수정 동작은 [화면](../PRD.md#화면별-요구사항)과 [게임 규칙](../PRD.md#게임-규칙), 민감정보·권한의 제품 제약은 [PRD](../PRD.md)를 따른다. 이 문서는 인증 상태 전달·인가·검증 구현을 관리한다.
@@ -29,7 +29,7 @@
 
 ### 해시·프록시
 
-- **argon2id 파라미터**: `@node-rs/argon2` 기본값 대신 OWASP 최소 권장(메모리 19 MiB, 반복 2, 병렬 1)으로 시작하고 Render 무료 인스턴스의 해시 시간(목표 약 100~300ms)을 측정해 조정한다. 구현 때 이 PC(i5-1335U)에서는 해시 1회가 약 11ms였다. Render 무료 인스턴스에서 서버 안 로그로 11회 잰 결과 중앙값 약 311ms·평균 약 361ms(130~716ms)로 목표 상단에 걸쳐 **파라미터를 올리지 않고 그대로 둔다**([IMPL-013](../TASKS.md#impl-013-배포), [worklog](../worklogs/2026-11-05.md#impl-013-argon2id-해시-시간-서버-내-로그)). 더 내리면 OWASP 최소 권장 아래가 된다. 인스턴스 사양이 바뀌면 `argon2_timing` 로그로 다시 확인한다.
+- **argon2id 파라미터**: `@node-rs/argon2` 기본값 대신 OWASP 최소 권장(메모리 19 MiB, 반복 2, 병렬 1)으로 시작하고 Render 무료 인스턴스의 해시 시간(목표 약 100~300ms)을 측정해 조정한다. 구현 때 이 PC(i5-1335U)에서는 해시 1회가 약 11ms였다. Render 무료 인스턴스에서 서버 안 로그로 11회 잰 결과 중앙값 약 311ms·평균 약 361ms(130~716ms)로 목표 상단에 걸쳐 **파라미터를 올리지 않고 그대로 둔다**([IMPL-013](../legacy/TASKS-team.md#impl-013-배포), [worklog](../worklogs/2026-11-05.md#impl-013-argon2id-해시-시간-서버-내-로그)). 더 내리면 OWASP 최소 권장 아래가 된다. 인스턴스 사양이 바뀌면 `argon2_timing` 로그로 다시 확인한다.
 - **프록시 신뢰**: `app.set('trust proxy', 1)`(Render 프록시 1단). `secure` 쿠키와 IP 제한이 이에 의존한다. 운영 설정에서 `X-Forwarded-Proto: https`가 있을 때 세션 쿠키에 `Secure`가 붙는 것을 테스트로 확인했다.
 - **환경 변수**: `SESSION_SECRET`은 32자 이상이어야 서버가 시작한다. 값은 문서·로그에 남기지 않는다([OPERATIONS](OPERATIONS.md)).
 

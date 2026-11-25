@@ -5,8 +5,8 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | PostgreSQL(Neon), Drizzle ORM + node-postgres, 세션 테이블은 connect-pg-simple ([DEC-013](../DECISIONS.md#결정-색인)). 랭킹·레이팅·`matches` 제외([DEC-022](../DECISIONS.md#결정-색인)), 방 정보는 `rooms`([DEC-023](../DECISIONS.md#결정-색인)), 사용자·방 컬럼과 입장·종료 처리([DEC-027](../DECISIONS.md#결정-색인)) |
-| 현재 구현 | 스키마·마이그레이션·연결 풀(`packages/server/src/db`, [IMPL-006](../TASKS.md#impl-006-db마이그레이션)). 방 생성·입장·즉시 참가·퇴장·시작 커밋·서버 시작 정리 쿼리(`packages/server/src/rooms/room-store.ts`, [IMPL-008](../TASKS.md#impl-008-로비방-서버)). 종료 저장 쿼리는 IMPL-011 |
-| 확정 (DB-001 완료) | 아래 [DB-001](../TASKS.md#db-001-db-스키마-확정) 스키마. 이전의 `[제안]` 표시는 개발자 B가 확정해 제거했다 |
+| 현재 구현 | 스키마·마이그레이션·연결 풀(`packages/server/src/db`, [IMPL-006](../legacy/TASKS-team.md#impl-006-db마이그레이션)). 방 생성·입장·즉시 참가·퇴장·시작 커밋·서버 시작 정리 쿼리(`packages/server/src/rooms/room-store.ts`, [IMPL-008](../legacy/TASKS-team.md#impl-008-로비방-서버)). 종료 저장 쿼리는 IMPL-011 |
+| 확정 (DB-001 완료) | 아래 [DB-001](../legacy/TASKS-team.md#db-001-db-스키마-확정) 스키마. 이전의 `[제안]` 표시는 개발자 B가 확정해 제거했다 |
 | 미정 | 아래 미정 사항 |
 
 상위 구조는 [DESIGN](../DESIGN.md)이다. 보관·삭제·열람 정책은 [PRD](../PRD.md), 선택 이유는 [결정 기록](../DECISIONS.md)을 따른다. 이 문서는 스키마·관계·제약·인덱스·트랜잭션·마이그레이션을 관리한다.
@@ -22,7 +22,7 @@
 | `id` | serial PK | |
 | `nickname` | varchar(12) not null | 로그인 식별자, 변경 불가. 앱이 NFC로 정규화해 저장한다 |
 | `password` | text not null | **argon2id 해시값을 저장한다(원문 아님).** 컬럼명이 원문처럼 보이므로 스키마에 주석으로 남긴다 |
-| `appearance` | jsonb not null default 기본 외형(모든 항목 0) | 사람 아바타 외형([API `Appearance`](API.md#공통-타입), [DEC-059](../DECISIONS.md#결정-색인)). 마이그레이션 `0002_user_appearance`([IMPL-018](../TASKS.md#impl-018-사람-아바타-구현))가 기본값으로 컬럼을 더해 기존 행을 모두 고정 기본 외형으로 채우고 동물 캐릭터 컬럼 `character_id`를 지웠다. 값 범위는 앱(Zod)만 검사하고 DB `CHECK`는 두지 않는다. 읽을 때 없는 필드는 0으로 읽는다. 안경·모자·옷([DEC-078](../DECISIONS.md#결정-색인), [IMPL-024](../TASKS.md#impl-024-아바타-꾸미기-항목-확장안경모자옷))은 새 마이그레이션 없이 기존 행의 없는 필드를 0(없음·기본 티)으로 읽어 채우므로 DB 변경이 없다 |
+| `appearance` | jsonb not null default 기본 외형(모든 항목 0) | 사람 아바타 외형([API `Appearance`](API.md#공통-타입), [DEC-059](../DECISIONS.md#결정-색인)). 마이그레이션 `0002_user_appearance`([IMPL-018](../legacy/TASKS-team.md#impl-018-사람-아바타-구현))가 기본값으로 컬럼을 더해 기존 행을 모두 고정 기본 외형으로 채우고 동물 캐릭터 컬럼 `character_id`를 지웠다. 값 범위는 앱(Zod)만 검사하고 DB `CHECK`는 두지 않는다. 읽을 때 없는 필드는 0으로 읽는다. 안경·모자·옷([DEC-078](../DECISIONS.md#결정-색인), [IMPL-024](../legacy/TASKS-team.md#impl-024-아바타-꾸미기-항목-확장안경모자옷))은 새 마이그레이션 없이 기존 행의 없는 필드를 0(없음·기본 티)으로 읽어 채우므로 DB 변경이 없다 |
 | `total_games` | integer not null default 0 | CHECK >= 0. 승·패·무 모두 포함 |
 | `wins` / `losses` | integer not null default 0 | CHECK >= 0, `wins + losses <= total_games`. 무 = `total_games - wins - losses` |
 
@@ -44,7 +44,7 @@
 | `code` | varchar(6) unique null | 비공개 방 입장 코드. 공개 방은 null. 방장이 복사해 전달하므로 해시하지 않고 그대로 저장한다(사용자 비밀번호가 아닌 입장 코드) |
 | `piece_count` | integer not null default 5 | `CHECK (piece_count IN (5, 7, 9))`. 5·7·9는 PRD 고정값이며 개수를 늘리면 마이그레이션이 필요하다 |
 | `board` | varchar(16) not null | 방 생성 때 고른 판([API `BoardId`](API.md#공통-타입)). 판이 늘 수 있어 값은 앱(Zod)만 검사한다 |
-| `theme` | varchar(16) not null default 'bar' | 방 생성 때 고른 방 테마([API `ThemeId`](API.md#공통-타입), [DEC-052](../DECISIONS.md#결정-색인)). `board`처럼 값은 앱(Zod)만 검사한다. 기본값이 있어 기존 행·서버 시작 정리와 충돌하지 않는다. 마이그레이션 `0001_room_theme`([IMPL-015](../TASKS.md#impl-015-방-테마-구현)) |
+| `theme` | varchar(16) not null default 'bar' | 방 생성 때 고른 방 테마([API `ThemeId`](API.md#공통-타입), [DEC-052](../DECISIONS.md#결정-색인)). `board`처럼 값은 앱(Zod)만 검사한다. 기본값이 있어 기존 행·서버 시작 정리와 충돌하지 않는다. 마이그레이션 `0001_room_theme`([IMPL-015](../legacy/TASKS-team.md#impl-015-방-테마-구현)) |
 | `status` | varchar(16) not null default 'waiting' | `waiting`(대기 중) / `playing`(게임 중). `CHECK (status IN ('waiting', 'playing'))` |
 
 - 공개/비공개 제약: `CHECK ((is_public AND code IS NULL) OR (NOT is_public AND code IS NOT NULL))`. 비공개 방은 코드가 반드시 있고 공개 방은 없다. `code` 유니크로 같은 코드의 방이 둘 생기지 않는다(null은 여러 개 허용). 코드 중복 시 `CODE_TAKEN`을 돌려주어 다시 만들게 한다([API](API.md#오류-형식과-코드)).
