@@ -88,7 +88,7 @@
 | [IMPL-030](#impl-030-로그인-화면-움직이는-배경과-시안-배치) | 로그인 화면 움직이는 배경과 시안 배치 | P1 | IMPL-019, IMPL-029 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
 | [IMPL-031](#impl-031-로비-명판-꾸미기-버튼) | 로비 명판 꾸미기 버튼 | P2 | IMPL-019 | 진행 중 | Claude — 사용자 요청 수행 | [#103](https://github.com/moguab2808-commits/mini-project-1-1/pull/103) |
 | [DOC-012](#doc-012-아키텍처-흐름-구성도) | 아키텍처 흐름 구성도 | P2 | 없음 | 진행 중 | Codex — 사용자 요청 수행 | 미생성 |
-| [DOC-013](#doc-013-개인-프로젝트-전환) | 개인 프로젝트 전환 | P1 | 없음 | 리뷰 중 | Claude — 사용자 요청 수행 | 미생성 |
+| [DOC-013](#doc-013-개인-프로젝트-전환) | 개인 프로젝트 전환 | P1 | 없음 | 리뷰 중 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/a4527/augmented-alkkagi/pull/1) |
 
 ## DOC-001 문서 책임과 구조 재편
 
@@ -1473,7 +1473,7 @@ Issue·PR: [PR #103](https://github.com/moguab2808-commits/mini-project-1-1/pull
 의존성: 없음
 범위: 2인 팀 프로젝트에서 개인 프로젝트로 전환한 결정을 기록하고, README 출처와 협업 규칙을 1인 개발에 맞게 고친다. gitleaks 오탐을 `.gitleaksignore`에 등록한다. 과거 작업의 담당·Issue·PR 기록과 제품 요구사항·설계는 바꾸지 않는다.
 관련 문서: [DEC-091](DECISIONS.md#결정-색인), [README 출처](../README.md#출처), [CONTRIBUTING](CONTRIBUTING.md)
-Issue·PR: 미생성
+Issue·PR: [PR #1](https://github.com/a4527/augmented-alkkagi/pull/1)
 
 수용 기준:
 
