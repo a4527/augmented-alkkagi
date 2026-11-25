@@ -28,3 +28,4 @@ AI·생성 도구·외부 출처를 쓴 에셋의 출처와 이용 조건을 기
 | 해변 배경 소리 | `packages/client/public/audio/ambience/beach.mp3` | Freesound #201284 "surf waves seagulls australia", rayjensen — https://freesound.org/people/rayjensen/sounds/201284/ | CC0 1.0(페이지 표기 "Creative Commons 0") | 2026-11-05 | 10~39.4초, 모노·48kbps, −24LUFS ([IMPL-029](legacy/TASKS-team.md#impl-029-소리배경음악배경-소리효과음)) |
 
 | 구성도 기술 로고 9종 | `docs/diagrams/icons/*.svg`, 구성도 내 인라인 경로 | [Simple Icons 16.0.0](https://www.npmjs.com/package/simple-icons/v/16.0.0) | CC0 1.0, [전문](diagrams/icons/LICENSE.md). 브랜드 상표 권리는 별도이며 기술 식별 용도로 사용 | 2026-11-05 | 구성도에서 크기·색 조정 |
+| 포트폴리오에 넣은 Black Han Sans 글꼴(한글·영문) | `augmented-alkkagi-portfolio-1.html`(base64 `@font-face`) | 위 Black Han Sans 행과 같은 파일(`packages/client/public/fonts/black-han-sans-*-400-normal.woff2`) | SIL Open Font License 1.1(파일 안 주석에 표기, 전문은 `packages/client/public/fonts/OFL-BlackHanSans.txt`) | 2026-11-25 | 변경 없음, base64로만 넣음 |

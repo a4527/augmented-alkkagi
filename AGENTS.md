@@ -26,6 +26,7 @@
 ├─ AGENTS.md
 ├─ CLAUDE.md
 ├─ README.md
+├─ augmented-alkkagi-portfolio-1.html  # 포트폴리오 1부(단일 HTML, 이미지·제목 글꼴 포함)
 └─ docs/
    ├─ PRD.md                    # 제품 요구사항·상세 규칙·보완 의견
    ├─ TASKS.md
