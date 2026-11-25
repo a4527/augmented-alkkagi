@@ -15,6 +15,8 @@
 
 ## 전체 구성과 경계
 
+발표용 흐름 구성도: [PNG](diagrams/architecture.png) · [편집 가능한 SVG](diagrams/architecture.svg). 코드와 승인된 배포 설계를 함께 표현하며 운영 배포 확인을 뜻하지 않는다.
+
 하나의 웹 서비스가 정적 클라이언트, REST API, Socket.IO 실시간 연결을 함께 제공한다. 게임 판정은 서버만 하고, 규칙·물리는 브라우저(로컬 모드)와 서버가 같은 `game-core` 패키지를 쓴다.
 
 ```text
