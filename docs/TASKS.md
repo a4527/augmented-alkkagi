@@ -25,6 +25,7 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | [DOC-013](#doc-013-개인-프로젝트-전환) | 개인 프로젝트 전환 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/a4527/augmented-alkkagi/pull/1) |
 | [DOC-014](#doc-014-팀-시절-작업진행-기록-분리) | 팀 시절 작업·진행 기록 분리 | P1 | DOC-013 | 완료 | Claude — 사용자 요청 수행 | [PR #3](https://github.com/a4527/augmented-alkkagi/pull/3) |
+| [DOC-015](#doc-015-포트폴리오-1부-단일-html) | 포트폴리오 1부 단일 HTML | P2 | 없음 | 완료 | Claude — 사용자 요청 수행 | 미생성 |
 
 ## 새 작업 등록 양식
 
@@ -87,3 +88,22 @@ Issue·PR: [PR #3](https://github.com/a4527/augmented-alkkagi/pull/3)
 - [x] CONTRIBUTING·PR 양식·TASKS 완료 정의를 "마무리 PR에서 완료 표시, 병합 후 완료 반영 PR 없음"으로 고치고 DEC-093을 기록한다.
 
 검증 근거: [2026-11-25 worklog](worklogs/2026-11-25.md#doc-014-팀-시절-작업진행-기록-분리)
+
+## DOC-015 포트폴리오 1부 단일 HTML
+
+우선순위: P2
+상태: 완료
+담당: Claude — 사용자 요청 수행
+의존성: 없음
+범위: 포트폴리오 1부(claude.ai Artifact, 조직 밖 공유 꺼짐)를 어디서나 열리는 HTML 한 파일로 만들어 저장소 루트에 둔다. 내용·수치는 1부(기준 커밋 `87dfdcd`) 그대로 두고, 사용자 요청에 따라 소제목 번호의 강조와 줄글 너비만 바꾼다. 웹 공개(GitHub Pages 등)는 하지 않는다.
+관련 문서: [AGENTS 문서 구조](../AGENTS.md#문서-구조), [CREDITS](CREDITS.md)
+Issue·PR: 미생성
+
+수용 기준:
+
+- [x] `augmented-alkkagi-portfolio-1.html` 한 파일만으로 이미지 11장과 제목 글꼴이 보이고, 상대 경로 참조·스크립트가 없다.
+- [x] 데스크톱(1280px)·모바일(390px)과 네트워크를 막은 상태에서 레이아웃·이미지가 원본과 같게 나온다.
+- [x] 소제목 번호(01·02 등)가 강조색·굵은 글씨로 보이고, 줄글 너비가 표·사진 너비(64rem)와 맞는다.
+- [x] 파일 안에 넣은 글꼴의 출처·이용 조건을 CREDITS에 적고 비밀값 검사에서 누출이 없다.
+
+검증 근거: [2026-11-25 worklog](worklogs/2026-11-25.md#doc-015-포트폴리오-1부-단일-html)
