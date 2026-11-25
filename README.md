@@ -89,6 +89,14 @@ DB 테스트는 `DATABASE_URL`이 설정된 환경에서 `npm run test:db`로 �
 
 운영 서비스는 https://alkkagi-6q64.onrender.com 이다. 웹 서비스는 Render 무료 플랜, DB는 Neon PostgreSQL 무료 플랜이고 둘 다 싱가포르 리전이다. `/health`가 `{ "status": "ok" }`를 돌려주며, 가입한 뒤 로비에서 방을 만들거나 `/ai`에서 AI와 대전한다. 무료 서비스는 15분 동안 요청이 없으면 절전해 첫 접속이 약 1분 걸릴 수 있고, 외부 헬스체크가 10분마다 요청해 이를 줄인다. 배포·롤백·무료 한도 절차는 [OPERATIONS](docs/design/OPERATIONS.md)를 따른다.
 
+2026-11-25 확인 시 이 서비스는 소유자가 일시 중지해 접속되지 않는다. 개인 프로젝트 전환 후 운영을 다시 열지와 어느 계정에서 운영할지는 미정이다([DOC-013 worklog](docs/worklogs/2026-11-25.md#doc-013-개인-프로젝트-전환)). 그동안은 [서버 없이 AI·로컬 2인 실행](#서버-없이-ai로컬-2인-실행)으로 플레이한다.
+
+## 출처
+
+이 프로젝트는 2026-10-27 두 개발자가 [팀 저장소](https://github.com/moguab2808-commits/mini-project-1-1)에서 함께 시작한 미니프로젝트이며, 2026-11-25부터 이 저장소에서 개인 프로젝트로 이어 간다([DEC-091](docs/DECISIONS.md#결정-색인)). 전환 전의 기획·설계·구현은 두 사람의 공동 작업이고, 기여 내역은 Git 이력과 팀 저장소의 Issue·PR에 남아 있다. 문서의 "개발자 A·B"는 당시 담당 구분이다. 협업 규칙은 [CONTRIBUTING](docs/CONTRIBUTING.md)을 따른다.
+
+반입한 이미지·소리·글꼴 등 에셋의 출처와 이용 조건은 [CREDITS](docs/CREDITS.md)에 있다.
+
 ## 문서 안내
 
 작업 목적별 기준 문서와 각 문서의 책임은 [AGENTS](AGENTS.md#작업-목적에-따라-읽을-문서)에서 확인한다.

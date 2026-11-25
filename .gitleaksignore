@@ -1,0 +1,8 @@
+# gitleaks 오탐 목록. 한 줄에 지문(fingerprint) 하나.
+# 실제 비밀값은 여기에 등록하지 말고 값을 폐기·교체한다. 근거: docs/TASKS.md DOC-013
+
+# tests/integration/online.db.test.ts:87 — 통합 테스트 전용 세션 키(sessionSecret), 운영 값 아님
+# 작업 폴더 검사(gitleaks dir)
+tests/integration/online.db.test.ts:generic-api-key:87
+# Git 이력 검사(gitleaks git), 해당 줄을 추가한 커밋
+4d44bc36f13fcfcfed19158cdddfa0eb4928d683:tests/integration/online.db.test.ts:generic-api-key:87
