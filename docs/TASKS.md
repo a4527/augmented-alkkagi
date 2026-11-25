@@ -88,7 +88,7 @@
 | [IMPL-030](#impl-030-로그인-화면-움직이는-배경과-시안-배치) | 로그인 화면 움직이는 배경과 시안 배치 | P1 | IMPL-019, IMPL-029 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
 | [IMPL-031](#impl-031-로비-명판-꾸미기-버튼) | 로비 명판 꾸미기 버튼 | P2 | IMPL-019 | 진행 중 | Claude — 사용자 요청 수행 | [#103](https://github.com/moguab2808-commits/mini-project-1-1/pull/103) |
 | [DOC-012](#doc-012-아키텍처-흐름-구성도) | 아키텍처 흐름 구성도 | P2 | 없음 | 진행 중 | Codex — 사용자 요청 수행 | 미생성 |
-| [DOC-013](#doc-013-개인-프로젝트-전환) | 개인 프로젝트 전환 | P1 | 없음 | 리뷰 중 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/a4527/augmented-alkkagi/pull/1) |
+| [DOC-013](#doc-013-개인-프로젝트-전환) | 개인 프로젝트 전환 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/a4527/augmented-alkkagi/pull/1) |
 
 ## DOC-001 문서 책임과 구조 재편
 
@@ -1468,7 +1468,7 @@ Issue·PR: [PR #103](https://github.com/moguab2808-commits/mini-project-1-1/pull
 ## DOC-013 개인 프로젝트 전환
 
 우선순위: P1
-상태: 리뷰 중
+상태: 완료
 담당: Claude — 사용자 요청 수행
 의존성: 없음
 범위: 2인 팀 프로젝트에서 개인 프로젝트로 전환한 결정을 기록하고, README 출처와 협업 규칙을 1인 개발에 맞게 고친다. gitleaks 오탐을 `.gitleaksignore`에 등록한다. 과거 작업의 담당·Issue·PR 기록과 제품 요구사항·설계는 바꾸지 않는다.
@@ -1482,6 +1482,6 @@ Issue·PR: [PR #1](https://github.com/a4527/augmented-alkkagi/pull/1)
 - [x] CONTRIBUTING에서 담당 조율·상대방 리뷰를 1인 개발의 흐름·자기 검토로 바꾸고, TASKS의 완료 정의·Issue 안내와 어긋나지 않는다.
 - [x] `tests/integration/online.db.test.ts`의 테스트용 세션 키 오탐을 `.gitleaksignore`에 등록하고 `gitleaks git`·`gitleaks dir`가 누출 없음으로 끝난다.
 - [x] 전체 문서의 상대 링크·앵커, 협업 규칙 문구, TASKS 표와 본문 상태, README 배포 안내를 대조하고 어긋난 곳을 고친다.
-- [ ] 자기 검토 후 기준 브랜치에 병합됐다.
+- [x] 자기 검토 후 기준 브랜치에 병합됐다([PR #1](https://github.com/a4527/augmented-alkkagi/pull/1), 2026-11-25 병합 `d0e221e`).
 
 검증 근거: [2026-11-25 worklog](worklogs/2026-11-25.md#doc-013-개인-프로젝트-전환)
