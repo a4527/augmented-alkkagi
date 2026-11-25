@@ -24,7 +24,7 @@
 | ID | 작업 | 우선순위 | 의존성 | 상태 | 담당 | Issue·PR |
 | --- | --- | --- | --- | --- | --- | --- |
 | [DOC-013](#doc-013-개인-프로젝트-전환) | 개인 프로젝트 전환 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/a4527/augmented-alkkagi/pull/1) |
-| [DOC-014](#doc-014-팀-시절-작업진행-기록-분리) | 팀 시절 작업·진행 기록 분리 | P1 | DOC-013 | 리뷰 중 | Claude — 사용자 요청 수행 | 미생성 |
+| [DOC-014](#doc-014-팀-시절-작업진행-기록-분리) | 팀 시절 작업·진행 기록 분리 | P1 | DOC-013 | 리뷰 중 | Claude — 사용자 요청 수행 | [PR #3](https://github.com/a4527/augmented-alkkagi/pull/3) |
 
 ## 새 작업 등록 양식
 
@@ -75,7 +75,7 @@ Issue·PR: [PR #1](https://github.com/a4527/augmented-alkkagi/pull/1)
 의존성: DOC-013
 범위: 문서를 읽는 컨텍스트를 줄이려고 팀 시절 TASKS·PROGRESS를 `docs/legacy/`로 옮겨 동결하고, TASKS·PROGRESS를 개인 프로젝트 기준으로 짧게 다시 쓴다. 진행 중이던 팀 시절 작업 12건은 이어 가지 않고 닫는다. 다른 문서의 링크를 옮긴 위치로 바꾼다. DECISIONS는 옮기지 않는다.
 관련 문서: [DEC-092](DECISIONS.md#결정-색인), [팀 시절 작업 기록](legacy/TASKS-team.md), [팀 시절 진행 기록](legacy/PROGRESS-team.md), [AGENTS 문서 구조](../AGENTS.md#문서-구조)
-Issue·PR: 미생성
+Issue·PR: [PR #3](https://github.com/a4527/augmented-alkkagi/pull/3)
 
 수용 기준:
 
