@@ -26,8 +26,8 @@
 | [DOC-013](#doc-013-개인-프로젝트-전환) | 개인 프로젝트 전환 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/a4527/augmented-alkkagi/pull/1) |
 | [DOC-014](#doc-014-팀-시절-작업진행-기록-분리) | 팀 시절 작업·진행 기록 분리 | P1 | DOC-013 | 완료 | Claude — 사용자 요청 수행 | [PR #3](https://github.com/a4527/augmented-alkkagi/pull/3) |
 | [DOC-015](#doc-015-포트폴리오-1부-단일-html) | 포트폴리오 1부 단일 HTML | P2 | 없음 | 완료 | Claude — 사용자 요청 수행 | 미생성 |
-| [DOC-016](#doc-016-운영-보완-결정과-작업-등록) | 운영 보완 결정과 작업 등록 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | 미생성 |
-| [CI-001](#ci-001-pr-검사-자동화) | PR 검사 자동화 | P1 | 없음 | 예정 | 미정 | 미생성 |
+| [DOC-016](#doc-016-운영-보완-결정과-작업-등록) | 운영 보완 결정과 작업 등록 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6) |
+| [CI-001](#ci-001-pr-검사-자동화) | PR 검사 자동화 | P1 | 없음 | 진행 중 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6) |
 | [SEC-001](#sec-001-서버-보안-강화) | 서버 보안 강화 | P1 | 없음 | 예정 | 미정 | 미생성 |
 | [OPS-002](#ops-002-0원-호스팅-재검토) | 0원 호스팅 재검토 | P1 | 없음 | 예정 | 미정 | 미생성 |
 | [OPS-003](#ops-003-배포-자동화) | 배포 자동화 | P1 | CI-001, OPS-002 | 예정 | 미정 | 미생성 |
@@ -123,7 +123,7 @@ Issue·PR: 미생성
 의존성: 없음
 범위: 클라우드·DevOps·아키텍처 관점의 보완 검토(보안·운영·모니터링·CI/CD·검증)에서 사용자가 정한 방향(배포 자동화, 월 0원 유지, 호스팅 재검토 허용, 백업 보류)을 결정으로 기록하고, 관련 설계 문서에 예정·미정을 표시하고, 보완 작업을 등록한다. 코드·배포 설정은 바꾸지 않는다.
 관련 문서: [DEC-094](DECISIONS.md#결정-색인), [OPERATIONS](design/OPERATIONS.md), [TECH_STACK](design/TECH_STACK.md#채택한-기술)
-Issue·PR: 미생성
+Issue·PR: [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6)
 
 수용 기준:
 
@@ -137,23 +137,24 @@ Issue·PR: 미생성
 ## CI-001 PR 검사 자동화
 
 우선순위: P1
-상태: 예정
-담당: 미정
+상태: 진행 중
+담당: Claude — 사용자 요청 수행
 의존성: 없음
-범위: GitHub Actions로 PR과 `main` 푸시마다 저장소의 기존 검사 명령과 비밀값 검사를 실행하고, 통과를 병합 조건으로 둔다. 의존성 갱신 PR을 자동으로 받는다. 배포는 [OPS-003](#ops-003-배포-자동화)에서 다룬다. 공개 저장소의 무료 범위 안에서 운영한다([DEC-094](DECISIONS.md#결정-색인)).
+범위: GitHub Actions로 PR과 `main` 푸시마다 저장소의 기존 검사 명령과 비밀값 검사를 실행하고, 통과를 병합 조건으로 둔다. 의존성 갱신 PR을 자동으로 받는다. 배포는 [OPS-003](#ops-003-배포-자동화)에서 다룬다. 공개 저장소의 무료 범위 안에서 운영한다([DEC-094](DECISIONS.md#결정-색인)). CI에서 처음 실행한 `test:db`가 드러낸 낡은 테스트 기대값을 현행 계약에 맞춘다.
 관련 문서: [LOCAL](design/LOCAL.md), [ENGINEERING-VALIDATION](ENGINEERING-VALIDATION.md#기능회귀-검증-설계-후보), [CONTRIBUTING 자기 검토](CONTRIBUTING.md#자기-검토)
-Issue·PR: 미생성
+Issue·PR: [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6)
 
 수용 기준:
 
-- [ ] PR과 `main` 푸시에서 `npm ci` 뒤 `npm run lint`·`npm run format`·`npm run build`(타입 검사 포함)·`npm test`가 실행되고, 하나라도 실패하면 검사가 실패로 표시된다.
-- [ ] `npm run test:db`가 워크플로 안의 PostgreSQL 서비스 컨테이너로 실행된다. 접속 정보는 테스트 전용 값이며 저장소 비밀값을 쓰지 않는다.
-- [ ] gitleaks가 PR의 변경 이력을 검사해 `.gitleaksignore` 밖의 누출이 있으면 실패한다.
-- [ ] `main` 브랜치 보호에서 위 검사 통과를 병합 조건으로 두고 직접 푸시를 막는다. 일부러 실패시킨 PR에서 병합 버튼이 막히는 것을 확인한다.
-- [ ] npm·GitHub Actions 의존성의 갱신 PR이 자동으로 만들어지고 같은 검사를 거친다.
-- [ ] 워크플로의 실행 시간과 무료 범위(공개 저장소 Actions)를 worklog에 기록하고, CONTRIBUTING 자기 검토에 CI 결과 확인을 넣는다.
+- [x] PR과 `main` 푸시에서 `npm ci` 뒤 `npm run lint`·`npm run format`·`npm run build`(타입 검사 포함)·`npm test`가 실행되고, 하나라도 실패하면 검사가 실패로 표시된다.
+- [x] `npm run test:db`가 워크플로 안의 PostgreSQL 서비스 컨테이너로 실행된다. 접속 정보는 테스트 전용 값이며 저장소 비밀값을 쓰지 않는다.
+- [x] gitleaks가 PR의 변경 이력을 검사해 `.gitleaksignore` 밖의 누출이 있으면 실패한다.
+- [x] `main` 브랜치 보호에서 위 검사 통과를 병합 조건으로 두고 직접 푸시를 막는다. 일부러 실패시킨 PR에서 병합 버튼이 막히는 것을 확인한다.
+- [ ] npm·GitHub Actions 의존성의 갱신 PR이 자동으로 만들어지고 같은 검사를 거친다. 설정(`.github/dependabot.yml`)은 넣었고, Dependabot이 기본 브랜치의 설정만 읽어 첫 갱신 PR은 이 PR이 반영된 뒤에 확인한다.
+- [x] 워크플로의 실행 시간과 무료 범위(공개 저장소 Actions)를 worklog에 기록하고, CONTRIBUTING 자기 검토에 CI 결과 확인을 넣는다.
 
-검증 근거: 작업일의 worklog
+검증 근거: [2026-11-26 worklog](worklogs/2026-11-26.md#ci-001-pr-검사-자동화)
+남은 확인: 기본 브랜치 반영 뒤 첫 Dependabot PR이 생기고 CI를 거치면 다음 작업 PR에서 마지막 기준을 체크하고 완료로 바꾼다.
 
 ## SEC-001 서버 보안 강화
 
