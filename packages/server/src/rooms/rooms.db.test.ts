@@ -210,7 +210,7 @@ describe.skipIf(!baseUrl)('로비·방 (IMPL-008)', () => {
       expect(text).not.toContain('K7M2QX');
       expect(text).not.toMatch(/"(code|guest|hostId|guestId|id|pieceCount|board)"/);
       expect(Object.keys(byTitle['비공개방']).sort()).toEqual(
-        ['host', 'isPublic', 'roomId', 'status', 'title'].sort(),
+        ['host', 'isPublic', 'roomId', 'status', 'theme', 'title'].sort(),
       );
     });
 

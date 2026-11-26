@@ -297,7 +297,7 @@ sequenceDiagram
 
 | 이벤트·응답 | 상대(또는 목록 조회자)에게 가는 필드 | 상대 보유 정보 | 판정 |
 | --- | --- | --- | --- |
-| `GET /api/rooms` | `roomId`, `title`, `isPublic`, `status`, 방장 `Member` | 없음. 비공개 코드·사용자 번호 없음 | 통과 |
+| `GET /api/rooms` | `roomId`, `title`, `isPublic`, `status`, `theme`, 방장 `Member` | 없음. 비공개 코드·사용자 번호 없음 | 통과 |
 | `room:state` | 방·방장·상대 `Member`, `isHost`, 방장에게만 `code` | 없음. 상대 사본에는 `code` 없음 | 통과 |
 | `room:closed` | `reason` | 없음 | 통과 |
 | `game:start` | `gameId`, `seat`, `players`(좌석·닉네임·캐릭터), 판·알·라운드·시간, 내 `view` | 없음. `view.private`는 받는 사람 본인 것 | 통과 |
