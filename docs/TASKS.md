@@ -27,12 +27,13 @@
 | [DOC-014](#doc-014-팀-시절-작업진행-기록-분리) | 팀 시절 작업·진행 기록 분리 | P1 | DOC-013 | 완료 | Claude — 사용자 요청 수행 | [PR #3](https://github.com/a4527/augmented-alkkagi/pull/3) |
 | [DOC-015](#doc-015-포트폴리오-1부-단일-html) | 포트폴리오 1부 단일 HTML | P2 | 없음 | 완료 | Claude — 사용자 요청 수행 | 미생성 |
 | [DOC-016](#doc-016-운영-보완-결정과-작업-등록) | 운영 보완 결정과 작업 등록 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6) |
-| [CI-001](#ci-001-pr-검사-자동화) | PR 검사 자동화 | P1 | 없음 | 진행 중 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6) |
+| [CI-001](#ci-001-pr-검사-자동화) | PR 검사 자동화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6), [PR #12](https://github.com/a4527/augmented-alkkagi/pull/12) |
 | [SEC-001](#sec-001-서버-보안-강화) | 서버 보안 강화 | P1 | 없음 | 예정 | 미정 | 미생성 |
 | [OPS-002](#ops-002-0원-호스팅-재검토) | 0원 호스팅 재검토 | P1 | 없음 | 예정 | 미정 | 미생성 |
 | [OPS-003](#ops-003-배포-자동화) | 배포 자동화 | P1 | CI-001, OPS-002 | 예정 | 미정 | 미생성 |
 | [OBS-001](#obs-001-모니터링알림) | 모니터링·알림 | P2 | OPS-002 | 예정 | 미정 | 미생성 |
 | [VAL-003](#val-003-부하e2e-검증) | 부하·E2E 검증 | P2 | CI-001 | 예정 | 미정 | 미생성 |
+| [MNT-001](#mnt-001-2026-12-정기-의존성-패치) | 2026-12 정기 의존성 패치 | P2 | 없음 | 예정 | 미정 | 미생성 |
 
 ## 새 작업 등록 양식
 
@@ -137,12 +138,12 @@ Issue·PR: [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6)
 ## CI-001 PR 검사 자동화
 
 우선순위: P1
-상태: 진행 중
+상태: 완료
 담당: Claude — 사용자 요청 수행
 의존성: 없음
-범위: GitHub Actions로 PR과 `main` 푸시마다 저장소의 기존 검사 명령과 비밀값 검사를 실행하고, 통과를 병합 조건으로 둔다. 의존성 갱신 PR을 자동으로 받는다. 배포는 [OPS-003](#ops-003-배포-자동화)에서 다룬다. 공개 저장소의 무료 범위 안에서 운영한다([DEC-094](DECISIONS.md#결정-색인)). CI에서 처음 실행한 `test:db`가 드러낸 낡은 테스트 기대값을 현행 계약에 맞춘다.
+범위: GitHub Actions로 PR과 `main` 푸시마다 저장소의 기존 검사 명령과 비밀값 검사를 실행하고, 통과를 병합 조건으로 둔다. 의존성 취약점은 알림으로 받는다(자동 PR 없음, [DEC-095](DECISIONS.md#결정-색인)). 배포는 [OPS-003](#ops-003-배포-자동화)에서 다룬다. 공개 저장소의 무료 범위 안에서 운영한다([DEC-094](DECISIONS.md#결정-색인)). CI에서 처음 실행한 `test:db`가 드러낸 낡은 테스트 기대값을 현행 계약에 맞춘다.
 관련 문서: [LOCAL](design/LOCAL.md), [ENGINEERING-VALIDATION](ENGINEERING-VALIDATION.md#기능회귀-검증-설계-후보), [CONTRIBUTING 자기 검토](CONTRIBUTING.md#자기-검토)
-Issue·PR: [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6)
+Issue·PR: [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6), [PR #12](https://github.com/a4527/augmented-alkkagi/pull/12)
 
 수용 기준:
 
@@ -150,11 +151,10 @@ Issue·PR: [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6)
 - [x] `npm run test:db`가 워크플로 안의 PostgreSQL 서비스 컨테이너로 실행된다. 접속 정보는 테스트 전용 값이며 저장소 비밀값을 쓰지 않는다.
 - [x] gitleaks가 PR의 변경 이력을 검사해 `.gitleaksignore` 밖의 누출이 있으면 실패한다.
 - [x] `main` 브랜치 보호에서 위 검사 통과를 병합 조건으로 두고 직접 푸시를 막는다. 일부러 실패시킨 PR에서 병합 버튼이 막히는 것을 확인한다.
-- [ ] npm·GitHub Actions 의존성의 갱신 PR이 자동으로 만들어지고 같은 검사를 거친다. 설정(`.github/dependabot.yml`)은 넣었고, Dependabot이 기본 브랜치의 설정만 읽어 첫 갱신 PR은 이 PR이 반영된 뒤에 확인한다.
+- [x] 의존성 취약점이 공개되면 저장소 알림(Dependabot alerts)으로 알 수 있고, 갱신·보안 수정 PR은 자동으로 만들어지지 않는다([DEC-095](DECISIONS.md#결정-색인)). 저장소 설정 API로 알림 켜짐·자동 보안 수정 꺼짐을 확인하고, 버전 갱신 설정 파일(`.github/dependabot.yml`)이 없다. 처음 넣었던 주간 갱신 PR 방식은 기본 브랜치 반영 뒤 PR 4건이 만들어지고 CI를 거치는 것까지 확인한 뒤 이 방식으로 바꿨다.
 - [x] 워크플로의 실행 시간과 무료 범위(공개 저장소 Actions)를 worklog에 기록하고, CONTRIBUTING 자기 검토에 CI 결과 확인을 넣는다.
 
-검증 근거: [2026-11-26 worklog](worklogs/2026-11-26.md#ci-001-pr-검사-자동화)
-남은 확인: 기본 브랜치 반영 뒤 첫 Dependabot PR이 생기고 CI를 거치면 다음 작업 PR에서 마지막 기준을 체크하고 완료로 바꾼다.
+검증 근거: [2026-11-26 worklog](worklogs/2026-11-26.md#ci-001-pr-검사-자동화), [의존성 관리 방식 변경](worklogs/2026-11-26.md#ci-001-의존성-관리-방식-변경)
 
 ## SEC-001 서버 보안 강화
 
@@ -251,5 +251,25 @@ Issue·PR: 미생성
 - [ ] 두 계정이 로그인 → 방 생성·입장 → 경기 종료 → 전적 반영까지 가는 브라우저 E2E가 CI에서 실행된다.
 - [ ] 서버 재시작 전후로 회원·전적이 일치하는지(PRD 성공 기준 4) 자동 테스트로 확인한다.
 - [ ] 소켓 끊김·DB 저장 실패를 주입해 전적이 한 번만 저장되고 사용자 안내가 나오는지 확인한다. 재사용할 진단이 나오면 TROUBLESHOOTING에 등록한다.
+
+검증 근거: 작업일의 worklog
+
+## MNT-001 2026-12 정기 의존성 패치
+
+우선순위: P2
+상태: 예정
+담당: 미정
+의존성: 없음
+범위: [DEC-095](DECISIONS.md#결정-색인)의 월 1회 정기 패치(2026-12분). 열린 Dependabot 알림과 `npm audit`·`npm outdated` 결과를 보고 minor·patch 갱신을 모아 올린다. 메이저 갱신은 호환성을 확인해 올릴지 따로 정하고, 올리지 않으면 이유를 남긴다. 다음 달 정기 패치 작업(MNT-002)을 이 작업의 마무리 PR에서 등록한다.
+관련 문서: [OPERATIONS 의존성·취약점 관리](design/OPERATIONS.md#의존성취약점-관리)
+Issue·PR: 미생성
+
+수용 기준:
+
+- [ ] 작업 시점의 열린 Dependabot 알림을 하나씩 처리(갱신으로 해소)하거나, 해소하지 않는 이유(개발 의존성만 해당·수정 버전 없음 등)를 worklog에 남긴다.
+- [ ] 개발 의존성 minor·patch 갱신을 올리고 CI(`check`·`test-db`·`secrets`)가 통과한다. 2026-11-26 Dependabot이 제안했던 묶음(eslint·prettier·typescript-eslint·vitest·@vitejs/plugin-react·vite·supertest)을 포함한다.
+- [ ] 같은 묶음 갱신 CI에서 시간 초과(5초)로 실패한 `packages/client/src/ai/ai-controller.test.ts`의 "planShotSteps는 미리보기마다 멈추고 끝까지 돌리면 planShot과 같은 계획이다"가 CI에서 안정적으로 통과한다(원인이 갱신인지 CI 속도인지 확인해 기록).
+- [ ] TypeScript 7·`@types/node` 26 같은 메이저 갱신은 올리지 않거나, 올린다면 lint·빌드·테스트 통과를 확인한다. 결정과 이유를 worklog에 남긴다.
+- [ ] 다음 정기 패치 작업(2027-01)을 TASKS에 등록한다.
 
 검증 근거: 작업일의 worklog
