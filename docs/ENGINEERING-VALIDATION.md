@@ -77,7 +77,7 @@
 - 비허용 방해요소·남의 턴 발사·판 밖 대상 등 입력 경계 검사
 - 서로 다른 PC·지원 브라우저에서 방 입장부터 경기 결과 확인까지 검사
 
-현재 `npm test`는 DB가 필요 없는 Vitest 검증, `npm run test:db`는 실제 임시 DB를 쓰는 통합 검증이다. 온라인·DB 실행은 DEC-065에 따라 후속으로 남겨 둔다.
+현재 `npm test`는 DB가 필요 없는 Vitest 검증, `npm run test:db`는 실제 임시 DB를 쓰는 통합 검증이다. 2026-11-26부터 두 검증 모두 PR마다 CI에서 실행한다(`test:db`는 PostgreSQL 컨테이너, [CI-001](TASKS.md#ci-001-pr-검사-자동화)). 실제 두 계정 온라인 실행은 [VAL-003](TASKS.md#val-003-부하e2e-검증)으로 남겨 둔다.
 
 ## 문서 변경 검증
 

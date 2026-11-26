@@ -5,9 +5,10 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | 아래 배포 구성 ([DEC-013](../DECISIONS.md#결정-색인), [ADR-0003](../adr/0003-tech-stack-and-architecture.md)). 헬스체크 서비스·수동 배포·백업 방식([DEC-029](../DECISIONS.md#결정-색인)) |
+| 승인된 미구현 설계 (2026-11-26) | CI 통과 후 자동 배포·배포 뒤 확인·실패 알림([DEC-094](../DECISIONS.md#결정-색인), [OPS-003](../TASKS.md#ops-003-배포-자동화)). 아래 수동 배포 절차를 대체할 예정이며 구현 전까지 수동 배포를 쓴다 |
 | 현재 구현 | 없음 |
 | 확정 (OPS-001 완료) | 아래 [OPS-001](../legacy/TASKS-team.md#ops-001-운영-설계-확정) 세부 절차와 [무료 조건 확인](#무료-조건-재확인-2026-10-30) |
-| 미정 | 아래 미정 사항 |
+| 미정 | 아래 미정 사항. 호스팅을 Render로 유지할지는 0원 조건으로 재검토 중이다([DEC-094](../DECISIONS.md#결정-색인), [OPS-002](../TASKS.md#ops-002-0원-호스팅-재검토)) |
 
 비용·보관·삭제·장애 시 제품 약속은 [PRD](../PRD.md), 실행 절차는 [README](../../README.md), 성능·실패 실험 방법은 [ENGINEERING-VALIDATION](../ENGINEERING-VALIDATION.md)을 따른다.
 
@@ -49,6 +50,8 @@
 `/api`·`/socket.io`·`/health`를 제외한 GET 요청은 `index.html`을 반환한다. 이 경로 밖에서 파일 확장자가 있는 요청(정적 자산)이 없으면 404를 반환하고 `index.html`로 대체하지 않는다.
 
 ### 배포·롤백
+
+> 자동 배포로 바꾸기로 했다([DEC-094](../DECISIONS.md#결정-색인)). 아래 수동 배포 절차는 [OPS-003](../TASKS.md#ops-003-배포-자동화) 구현 전까지 쓰며, 구현할 때 이 절을 자동 배포 기준으로 다시 쓴다. CI를 통과하지 못한 커밋은 배포하지 않는다.
 
 - **자동 배포를 끄고 Render 대시보드에서 수동으로 배포한다**([DEC-029](../DECISIONS.md#결정-색인)). 코드·문서 작업이 끝나도 커밋·푸시·배포를 단계별로 확인한 뒤 진행한다. 자동 배포를 켜 두면 `main`에 푸시하는 순간 배포되어 이 결정과 맞지 않는다. 배포는 서버를 재시작해 진행 중인 경기와 연결이 끊기므로 사용자가 없을 때 한다.
 - **자동 배포 끄기**: 서비스 Settings → Auto-Deploy → Off. 서비스를 만들 때 한 번 설정하고, 대시보드 롤백 뒤에는 자동으로 꺼져 있으므로 다시 켜지 않는다.
@@ -102,7 +105,7 @@
 
 ### 백업·복구
 
-Neon 기본 복구(시점 복구)만 쓰며 별도 백업을 만들지 않는다([DEC-029](../DECISIONS.md#결정-색인)).
+Neon 기본 복구(시점 복구)만 쓰며 별도 백업을 만들지 않는다([DEC-029](../DECISIONS.md#결정-색인)). 외부 백업 도입은 2026-11-26에 보류로 정했다([DEC-094](../DECISIONS.md#결정-색인)).
 
 - **가능 기간(2026-10-30 확인)**: 무료 플랜의 history window는 기본·최대 6시간이고 이력은 1 GB가 상한이다. 기간 밖의 변경은 즉시 복구(instant restore)·Time Travel·과거 시점 브랜치로 되돌릴 수 없다([History window](https://neon.com/docs/postgres/backup-restore/history-window)).
 - **절차**([Instant restore](https://neon.com/docs/introduction/branch-restore)): 콘솔에서 브랜치 → Postgres database → Backup & Restore → Restore from history에서 시각이나 LSN을 골라 복구한다. 복구 전에 Time Travel Assist로 읽기 전용 질의를 해 시점을 확인한다. CLI(`neon branches restore`)와 API로도 할 수 있다.
@@ -114,5 +117,8 @@ Neon 기본 복구(시점 복구)만 쓰며 별도 백업을 만들지 않는다
 - UptimeRobot 공정 사용 정책의 한도: 구현 때 확인한다.
 - Render 로그 보관 7일이 무료 인스턴스에도 적용되는지: 배포 뒤 대시보드에서 확인한다.
 - 측정 합격 목표값: 첫 측정 뒤 정한다([ENGINEERING-VALIDATION](../ENGINEERING-VALIDATION.md)).
+- 호스팅 유지·변경, 운영 재개 여부와 계정: [OPS-002](../TASKS.md#ops-002-0원-호스팅-재검토)에서 정한다.
+- 자동 배포 방식(자동 배포 조건·deploy hook·배포 뒤 확인 방법): [OPS-003](../TASKS.md#ops-003-배포-자동화)에서 정한다.
+- 장애 알림·지표·클라이언트 오류 수집 서비스(0원 범위): [OBS-001](../TASKS.md#obs-001-모니터링알림)에서 정한다.
 
 제품 정책이 미정인 항목은 구현 편의로 결정하지 않는다. 실제 장애 사례는 [TROUBLESHOOTING](../TROUBLESHOOTING.md), 날짜별 실행·결과는 worklog에서 관리한다.

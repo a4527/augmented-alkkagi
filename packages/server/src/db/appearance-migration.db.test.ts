@@ -6,12 +6,23 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { DEFAULT_APPEARANCE } from '@alkkagi/shared';
+import { DEFAULT_APPEARANCE, normalizeAppearance } from '@alkkagi/shared';
 import { MIGRATIONS_FOLDER, runMigrations } from './migrate.ts';
 import { createPool } from './pool.ts';
 import { withDatabase } from './temp-database.ts';
 
 const baseUrl = process.env.DATABASE_URL;
+
+/** 0002 마이그레이션이 넣는 DB 기본값(이후 항목이 늘어도 바뀌지 않는다) */
+const STORED_DEFAULT = {
+  headShape: 0,
+  hair: 0,
+  eyebrows: 0,
+  eyes: 0,
+  nose: 0,
+  lips: 0,
+  skinTone: 0,
+};
 
 /** 앞의 마이그레이션 n개만 담은 임시 폴더 */
 function partialFolder(n: number): string {
@@ -54,10 +65,13 @@ describe.skipIf(!baseUrl)('users.appearance 마이그레이션', () => {
     const rows = await pool.query<{ nickname: string; appearance: unknown }>(
       `SELECT nickname, appearance FROM users ORDER BY id`,
     );
+    // DB 기본값은 0002 당시 7항목이고, 뒤에 더한 항목(DEC-078)은 읽을 때 0으로 채운다(normalizeAppearance).
     expect(rows.rows).toEqual([
-      { nickname: '곰', appearance: DEFAULT_APPEARANCE },
-      { nickname: '여우', appearance: DEFAULT_APPEARANCE },
+      { nickname: '곰', appearance: STORED_DEFAULT },
+      { nickname: '여우', appearance: STORED_DEFAULT },
     ]);
+    for (const r of rows.rows)
+      expect(normalizeAppearance(r.appearance)).toEqual(DEFAULT_APPEARANCE);
     const cols = await pool.query(
       `SELECT column_name FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'character_id'`,
     );
@@ -65,6 +79,7 @@ describe.skipIf(!baseUrl)('users.appearance 마이그레이션', () => {
     // 새 행도 기본 외형으로 들어간다
     await pool.query(`INSERT INTO users (nickname, password) VALUES ('새사람', 'h')`);
     const fresh = await pool.query(`SELECT appearance FROM users WHERE nickname = '새사람'`);
-    expect(fresh.rows[0].appearance).toEqual(DEFAULT_APPEARANCE);
+    expect(fresh.rows[0].appearance).toEqual(STORED_DEFAULT);
+    expect(normalizeAppearance(fresh.rows[0].appearance)).toEqual(DEFAULT_APPEARANCE);
   });
 });

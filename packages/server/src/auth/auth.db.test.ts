@@ -2,7 +2,7 @@ import type { AddressInfo } from 'node:net';
 import request from 'supertest';
 import { io as connect, type Socket as ClientSocket } from 'socket.io-client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { DEFAULT_APPEARANCE, SessionReplacedSchema } from '@alkkagi/shared';
+import { APPEARANCE_CHOICES, DEFAULT_APPEARANCE, SessionReplacedSchema } from '@alkkagi/shared';
 import { createAppServer, type AppServer } from '../app.ts';
 import { createTempDatabase, type TempDatabase } from '../db/temp-database.ts';
 
@@ -280,7 +280,7 @@ describe.skipIf(!baseUrl)('인증 API·세션·Socket.IO 인증', () => {
       const bad = [
         { appearance: { ...DEFAULT_APPEARANCE, hair: 5 } },
         { appearance: { ...DEFAULT_APPEARANCE, eyes: -1 } },
-        { appearance: { ...DEFAULT_APPEARANCE, hat: 1 } },
+        { appearance: { ...DEFAULT_APPEARANCE, hat: APPEARANCE_CHOICES } },
         { appearance: { hair: 1 } },
         { appearance: DEFAULT_APPEARANCE, extra: true },
         { characterId: 'owl' },

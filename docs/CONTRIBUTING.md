@@ -23,6 +23,7 @@ Issue·PR 본문 양식은 `docs/templates/`에서 복사해 사용한다. GitHu
 - TASKS 수용 기준을 하나씩 대조하고, 확인된 항목만 체크했다.
 - 관련 PRD·설계·결정과 어긋나는 동작이나 문서 중복이 없다. 요구사항·설계·결정이 바뀌었으면 해당 기준 문서를 같은 PR에서 갱신했다.
 - 변경에 맞는 실제 명령(`npm test`·`npm run lint`·`npm run format` 등)과 관련 시나리오로 검증했고, 결과·한계를 worklog에 남겼다.
+- PR의 CI 검사(`check`·`test-db`·`secrets`, [워크플로](../.github/workflows/ci.yml))가 모두 통과했다. `main`은 이 검사를 통과한 PR로만 바뀐다([CI-001](TASKS.md#ci-001-pr-검사-자동화)).
 - 비밀정보·환경변수 값이 변경·문서·로그에 없다. 비밀값 검사(gitleaks)에서 테스트 전용 값이 오탐되면 값과 위치를 확인한 뒤 [.gitleaksignore](../.gitleaksignore)에 지문과 근거를 등록하고, 실제 비밀값이면 등록하지 않고 폐기·교체한다.
 - AI 도구가 작성·검토한 변경도 같은 기준으로 직접 확인한다.
 

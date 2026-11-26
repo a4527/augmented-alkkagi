@@ -81,7 +81,7 @@ npm run dev -w @alkkagi/client -- --host 127.0.0.1
 
 온라인 서버는 PostgreSQL 연결 설정 `DATABASE_URL`(운영은 Neon 무료 플랜의 연결 문자열)과 32자 이상인 `SESSION_SECRET`이 필요하다. 변수 이름은 [.env.example](.env.example)에 있으며 복사해 `.env`로 만들고 값을 채운다. 환경에 값을 설정한 뒤 `npm run db:migrate -w @alkkagi/server`, `npm run dev -w @alkkagi/server`를 실행한다. 마이그레이션 명령은 루트 `.env`도 읽지만 개발 서버 명령은 프로세스 환경을 읽는다. `/`(로그인·로비·대기실)는 서버를 띄운 뒤 개발 서버로 연다.
 
-DB 테스트는 `DATABASE_URL`이 설정된 환경에서 `npm run test:db`로 실행한다. 연결 계정에 임시 DB 생성·삭제 권한이 필요하고, 테스트는 임시 DB를 만들었다가 지운다. 환경변수 실제 값과 비밀정보는 문서에 적지 않는다.
+DB 테스트는 `DATABASE_URL`이 설정된 환경에서 `npm run test:db`로 실행한다. 연결 계정에 임시 DB 생성·삭제 권한이 필요하고, 테스트는 임시 DB를 만들었다가 지운다. 환경변수 실제 값과 비밀정보는 문서에 적지 않는다. PR마다 GitHub Actions가 위 검사와 `test:db`(PostgreSQL 컨테이너), 비밀값 검사를 실행하며 통과해야 `main`에 병합된다([워크플로](.github/workflows/ci.yml)).
 
 새 환경에서 처음부터 실행해 확인한 조건·결과는 [DOC-011 worklog](docs/worklogs/2026-11-05.md#doc-011-readme-새-환경-검증)에 있다. 온라인 대전 클라이언트의 검증 조건·한계는 [IMPL-010 worklog](docs/worklogs/2026-11-03.md#impl-010-온라인-대전-클라이언트)에 있다.
 
