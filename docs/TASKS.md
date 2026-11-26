@@ -29,10 +29,14 @@
 | [DOC-016](#doc-016-운영-보완-결정과-작업-등록) | 운영 보완 결정과 작업 등록 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6) |
 | [CI-001](#ci-001-pr-검사-자동화) | PR 검사 자동화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6), [PR #12](https://github.com/a4527/augmented-alkkagi/pull/12) |
 | [SEC-001](#sec-001-서버-보안-강화) | 서버 보안 강화 | P1 | 없음 | 예정 | 미정 | 미생성 |
-| [OPS-002](#ops-002-0원-호스팅-재검토) | 0원 호스팅 재검토 | P1 | 없음 | 예정 | 미정 | 미생성 |
-| [OPS-003](#ops-003-배포-자동화) | 배포 자동화 | P1 | CI-001, OPS-002 | 예정 | 미정 | 미생성 |
-| [OBS-001](#obs-001-모니터링알림) | 모니터링·알림 | P2 | OPS-002 | 예정 | 미정 | 미생성 |
-| [VAL-003](#val-003-부하e2e-검증) | 부하·E2E 검증 | P2 | CI-001 | 예정 | 미정 | 미생성 |
+| [OPS-002](#ops-002-0원-호스팅-재검토) | 0원 호스팅 재검토 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #13](https://github.com/a4527/augmented-alkkagi/pull/13) |
+| [OPS-004](#ops-004-운영-서버-구축) | 운영 서버 구축 | P1 | OPS-002 | 예정 | 미정 | 미생성 |
+| [OPS-005](#ops-005-db-백업복구) | DB 백업·복구 | P1 | OPS-004 | 예정 | 미정 | 미생성 |
+| [OPS-003](#ops-003-배포-자동화) | 배포 자동화 | P1 | CI-001, OPS-004 | 예정 | 미정 | 미생성 |
+| [OBS-001](#obs-001-모니터링알림) | 모니터링·알림 | P1 | OPS-004 | 예정 | 미정 | 미생성 |
+| [VAL-003](#val-003-부하e2e-검증) | 부하·E2E 검증 | P2 | CI-001, OPS-004 | 예정 | 미정 | 미생성 |
+| [POR-001](#por-001-itchio-배포) | itch.io 배포 | P1 | OPS-004, OPS-003 | 예정 | 미정 | 미생성 |
+| [POR-002](#por-002-crazygames-배포) | CrazyGames 배포 | P2 | POR-001 | 예정 | 미정 | 미생성 |
 | [MNT-001](#mnt-001-2026-12-정기-의존성-패치) | 2026-12 정기 의존성 패치 | P2 | 없음 | 예정 | 미정 | 미생성 |
 
 ## 새 작업 등록 양식
@@ -162,7 +166,7 @@ Issue·PR: [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6), [PR #12](
 상태: 예정
 담당: 미정
 의존성: 없음
-범위: HTTP 보안 헤더와 Socket.IO 연결·메시지 경계를 강화한다. 대상은 출처 확인, 메시지 크기, 경기 명령·조준 스트림 빈도 제한이다. 사용자당 소켓 연결은 이미 1개로 대체되므로(`realtime/connections.ts`) 연결 수 제한은 범위에서 뺀다. 인증 방식·세션 정책은 바꾸지 않는다.
+범위: HTTP 보안 헤더와 Socket.IO 연결·메시지 경계를 강화한다. 대상은 출처 확인, 메시지 크기, 경기 명령·조준 스트림 빈도 제한이다. 사용자당 소켓 연결은 이미 1개로 대체되므로(`realtime/connections.ts`) 연결 수 제한은 범위에서 뺀다. 인증 방식·세션 정책은 바꾸지 않는다. 포털 출처 허용은 [POR-001](#por-001-itchio-배포)에서 다룬다.
 관련 문서: [AUTH](design/AUTH.md), [API](design/API.md), [ENGINEERING-VALIDATION 비공개 정보·권한](ENGINEERING-VALIDATION.md#최소-측정-항목)
 Issue·PR: 미생성
 
@@ -180,58 +184,100 @@ Issue·PR: 미생성
 ## OPS-002 0원 호스팅 재검토
 
 우선순위: P1
-상태: 예정
-담당: 미정
+상태: 완료
+담당: Claude — 사용자 요청 수행
 의존성: 없음
-범위: 월 0원 조건([DEC-094](DECISIONS.md#결정-색인))으로 Render 유지와 다른 호스팅을 비교해 하나를 정한다. 운영 재개 여부와 운영 계정도 함께 정한다. DB(Neon)를 바꿀지도 비교에 넣되, 바꾸지 않으면 현행을 유지한다. 비교와 추천까지가 Claude의 범위이고 선택은 사용자가 한다.
-관련 문서: [OPERATIONS 무료 조건](design/OPERATIONS.md#무료-조건-재확인-2026-10-30), [ADR-0003](adr/0003-tech-stack-and-architecture.md), [PRD 비기능 요구사항](PRD.md#4-비기능-요구사항과-제약)
-Issue·PR: 미생성
+범위: 월 0원 조건([DEC-094](DECISIONS.md#결정-색인))으로 Render 유지와 다른 호스팅을 비교해 하나를 정한다. 운영 재개 여부와 운영 계정도 함께 정한다. DB(Neon)를 바꿀지도 비교에 넣되, 바꾸지 않으면 현행을 유지한다. 비교와 추천까지가 Claude의 범위이고 선택은 사용자가 한다. 진행 중 사용자가 게임 포털 배포([DEC-097](DECISIONS.md#결정-색인))와 운영 기준([DEC-096](DECISIONS.md#결정-색인), 월 1만 원 이하·24시간 이용·계정 손실 없음 등)을 새로 정해 비교 조건을 그 기준으로 바꿨다.
+관련 문서: [OPERATIONS 비용·한도](design/OPERATIONS.md#비용한도-확인-2026-11-26), [ADR-0005](adr/0005-hosting-and-data.md), [PRD 비기능 요구사항](PRD.md#4-비기능-요구사항과-제약)
+Issue·PR: [PR #13](https://github.com/a4527/augmented-alkkagi/pull/13)
 
 수용 기준:
 
-- [ ] Render를 포함한 후보 3개 이상을 공식 문서(확인일 포함)로 비교한다. 비교 기준은 다음과 같다: 카드 등록·체험 크레딧 소진 뒤에도 월 0원으로 상시 실행되는지, WebSocket 지원, 단일 인스턴스 메모리 상태 유지(자동 축소·재시작·절전), 첫 접속 5초, 한국에서의 지연과 Neon 리전과의 거리, Git 연동 자동 배포·롤백, 로그 보관.
-- [ ] 사용자가 고른 결과를 기록한다. 호스팅을 바꾸면 ADR과 새 DEC로, 유지하면 DEC로 남긴다. 운영 재개 여부·계정도 같은 결정에 적는다.
-- [ ] OPERATIONS·TECH_STACK·README 배포 절을 결정에 맞게 고친다.
+- [x] Render를 포함한 후보 3개 이상을 공식 문서(확인일 포함)로 비교한다. 비교 기준은 다음과 같다: 카드 등록·체험 크레딧 소진 뒤에도 비용 조건 안에서 상시 실행되는지, WebSocket 지원, 단일 인스턴스 메모리 상태 유지(자동 축소·재시작·절전), 첫 접속 시간, 한국에서의 지연과 DB와의 거리, Git 연동 자동 배포·롤백, 로그 보관. 비용 조건은 작업 중 월 0원에서 월 1만 원 이하로 바뀌었다([DEC-096](DECISIONS.md#결정-색인)).
+- [x] 사용자가 고른 결과를 기록한다. 호스팅을 바꾸면 ADR과 새 DEC로, 유지하면 DEC로 남긴다. 운영 재개 여부·계정도 같은 결정에 적는다.
+- [x] OPERATIONS·TECH_STACK·README 배포 절을 결정에 맞게 고친다.
 
-검증 근거: 작업일의 worklog
+검증 근거: [2026-11-26 worklog](worklogs/2026-11-26.md#ops-002-운영-인프라-재검토)
 
 ## OPS-003 배포 자동화
 
 우선순위: P1
 상태: 예정
 담당: 미정
-의존성: CI-001, OPS-002
-범위: [DEC-094](DECISIONS.md#결정-색인)에 따라 `main`의 커밋이 CI를 통과하면 자동으로 배포하고, 배포 뒤 상태를 확인하고, 실패를 알린다. OPS-002에서 정한 호스팅을 대상으로 하며 0원 범위를 지킨다. 진행 중 경기는 배포 때 끊기는 현행 정책을 유지한다(바꾸려면 PRD 변경으로 따로 등록).
-관련 문서: [OPERATIONS 배포·롤백](design/OPERATIONS.md#배포롤백), [DATABASE 마이그레이션](design/DATABASE.md#마이그레이션)
+의존성: CI-001, OPS-004
+범위: [DEC-094](DECISIONS.md#결정-색인)에 따라 `main`의 커밋이 CI를 통과하면 자동으로 배포하고, 배포 뒤 상태를 확인하고, 실패를 알린다. 대상은 [DEC-098](DECISIONS.md#결정-색인)의 VM(Docker Compose)이며 이미지 저장소·배포 방법(예: GHCR + SSH)은 이 작업에서 정한다. 진행 중 경기는 배포 때 끊기는 현행 정책을 유지하고 이용자가 적은 시간에 배포한다([DEC-096](DECISIONS.md#결정-색인)). 프록시가 Cloudflare → Caddy 두 단계가 되므로 클라이언트 IP 판별과 `trust proxy`를 함께 바꾼다.
+관련 문서: [OPERATIONS 배포·롤백](design/OPERATIONS.md#배포롤백), [DATABASE 마이그레이션](design/DATABASE.md#마이그레이션), [AUTH](design/AUTH.md)
 Issue·PR: 미생성
 
 수용 기준:
 
 - [ ] CI를 통과한 `main` 커밋만 배포가 시작되고, CI가 실패한 커밋은 배포되지 않는다. 두 경우 모두 실제로 확인한다.
 - [ ] 배포 뒤 `/health`와 첫 화면(`/`)을 자동으로 확인하고, 배포나 확인이 실패하면 알림을 받는다.
-- [ ] 배포 설정은 저장소(`render.yaml` 등)에 두고 비밀값은 호스팅·GitHub 비밀 저장소에만 둔다.
+- [ ] 배포 설정(Compose·워크플로)은 저장소에 두고 비밀값은 VM의 저장소 밖 환경 파일과 GitHub 비밀 저장소에만 둔다. 배포용 SSH 키는 배포 전용이다.
+- [ ] Cloudflare·Caddy 뒤에서 요청의 클라이언트 IP가 실제 접속자 IP로 판별되어 IP당 빈도 제한이 동작하고, 운영 쿠키에 `secure`가 붙는다. AUTH의 프록시 신뢰 절을 고친다.
 - [ ] 시작 시 마이그레이션이 실패할 때 서비스 상태(이전 버전 유지 여부)를 확인해 기록한다.
-- [ ] 자동 배포 기준으로 롤백 절차를 다시 쓰고 한 번 실행해 본다. OPERATIONS 배포·롤백 절과 README를 고친다.
+- [ ] 이전 이미지로 되돌리는 롤백 절차를 쓰고 한 번 실행해 본다. OPERATIONS 배포·롤백 절과 README를 고친다.
+
+검증 근거: 작업일의 worklog
+
+## OPS-004 운영 서버 구축
+
+우선순위: P1
+상태: 예정
+담당: 미정
+의존성: OPS-002
+범위: [DEC-098](DECISIONS.md#결정-색인)·[ADR-0005](adr/0005-hosting-and-data.md)의 VM·도메인·Compose 구성을 만들고 서버·DB를 띄운다. 백업은 [OPS-005](#ops-005-db-백업복구), 자동 배포는 [OPS-003](#ops-003-배포-자동화), 모니터링은 [OBS-001](#obs-001-모니터링알림)에서 한다. 계정 생성·결제·비밀값 입력은 사용자가 하고 Claude는 설정 파일·절차를 준비한다.
+관련 문서: [OPERATIONS 운영 구성](design/OPERATIONS.md#운영-구성-승인-미구현), [PRD 비기능 요구사항](PRD.md#4-비기능-요구사항과-제약)
+Issue·PR: 미생성
+
+수용 기준:
+
+- [ ] 주문 전에 HostHatch 서울(차선 도쿄)의 월 가격·결제 주기·부가세·공유 CPU 약관을 확인하고 worklog와 OPERATIONS 비용 표에 남긴다. 월 결제 불가, 부가세·도메인 포함 월 1만 원 초과, 상시 CPU 사용 제한 중 하나라도 해당하면 대체안([ADR-0005](adr/0005-hosting-and-data.md#선택과-핵심-조건))으로 바꾸고 사용자에게 알린다.
+- [ ] 자체 도메인이 Cloudflare 프록시를 거쳐 HTTPS·WSS로 서버에 닿는다. Cloudflare와 서버 사이도 검증된 TLS다.
+- [ ] VM은 SSH 키 로그인만 허용하고, 방화벽으로 필요한 포트만 연다. 자동 보안 업데이트와 스왑을 켠다.
+- [ ] Docker Compose로 Caddy·서버·PostgreSQL이 실행되고, 컨테이너 종료와 VM 재부팅 뒤 자동으로 다시 올라온다(실제로 재부팅해 확인).
+- [ ] 대기 상태와 온라인 경기 1판 중의 메모리·디스크 사용량, 한국에서의 왕복 지연을 측정해 worklog에 남긴다.
+- [ ] 두 계정으로 로그인 → 방 생성·입장 → 경기 종료 → 전적 반영까지 확인한다.
+- [ ] 기존 Neon 데이터 이전 여부를 사용자가 정하고, 이전 운영 서비스(Render·Neon·UptimeRobot 절전 방지 요청)를 정리한다. README 배포 접속 절을 새 주소로 고친다.
+
+검증 근거: 작업일의 worklog
+
+## OPS-005 DB 백업·복구
+
+우선순위: P1
+상태: 예정
+담당: 미정
+의존성: OPS-004
+범위: 가입 계정·전적을 잃지 않는다는 기준([DEC-096](DECISIONS.md#결정-색인))에 따라 VM PostgreSQL의 연속 백업과 복구 절차를 만든다([OPERATIONS 백업·복구](design/OPERATIONS.md#백업복구)). 저장소는 Cloudflare R2 무료 범위다.
+관련 문서: [OPERATIONS 백업·복구](design/OPERATIONS.md#백업복구), [ADR-0005](adr/0005-hosting-and-data.md)
+Issue·PR: 미생성
+
+수용 기준:
+
+- [ ] WAL이 1분 안팎 간격으로 R2에 보관되고 주기 전체 백업이 쌓인다. 도구·보관 개수·R2 사용량을 OPERATIONS에 적는다.
+- [ ] 보관이나 백업이 실패하면 알림을 받는다(일부러 실패시켜 확인).
+- [ ] 임시 컨테이너에 특정 시점으로 복구해 회원·전적 수가 원본과 같은지 확인하고, 복구 소요 시간과 실제 손실 범위를 기록한다. 복구 시간은 24시간 기준 안이어야 한다.
+- [ ] 월 1회 복구 연습 절차를 OPERATIONS에 적는다.
 
 검증 근거: 작업일의 worklog
 
 ## OBS-001 모니터링·알림
 
-우선순위: P2
+우선순위: P1
 상태: 예정
 담당: 미정
-의존성: OPS-002
-범위: 0원 범위([DEC-094](DECISIONS.md#결정-색인))에서 장애 알림·서버 지표·오류 로그·클라이언트 오류를 볼 수 있게 한다. 로그 민감정보 허용 목록 원칙([OPERATIONS 서버 로그](design/OPERATIONS.md#서버-로그))은 유지한다. 측정 목표값(SLO)은 첫 측정 뒤 정하며 이 작업에서 확정하지 않는다.
-관련 문서: [OPERATIONS 서버 로그](design/OPERATIONS.md#서버-로그), [ENGINEERING-VALIDATION](ENGINEERING-VALIDATION.md#최소-측정-항목)
+의존성: OPS-004
+범위: [DEC-099](DECISIONS.md#결정-색인)의 도구(UptimeRobot·Grafana Cloud Free + Alloy·Sentry Developer)로 장애 알림·서버 지표·로그·오류·한도 알림을 만든다([OPERATIONS 모니터링](design/OPERATIONS.md#모니터링)). 로그 민감정보 허용 목록 원칙([OPERATIONS 서버 로그](design/OPERATIONS.md#서버-로그))은 유지한다. 트레이스(Tempo)는 2단계로 이 작업 범위 밖이다. 측정 목표값 중 PRD에 없는 항목은 첫 측정 뒤 정한다.
+관련 문서: [OPERATIONS 모니터링](design/OPERATIONS.md#모니터링), [ENGINEERING-VALIDATION](ENGINEERING-VALIDATION.md#최소-측정-항목)
 Issue·PR: 미생성
 
 수용 기준:
 
-- [ ] 서비스가 응답하지 않으면 알림이 온다(실제로 서비스를 멈춰 확인). 절전 방지 요청과 알림 설정의 관계를 OPERATIONS에 적는다.
-- [ ] 서버 오류 로그가 경기 로그와 같은 구조화 JSON 한 줄이며, 요청 본문·쿠키·연결 문자열이 들어가지 않는다(테스트로 확인).
-- [ ] 동시 연결·방 수, 이벤트 루프 지연, `tick_skipped`, 메모리를 볼 방법이 있고, 선택한 서비스와 무료 한도를 OPERATIONS에 적는다.
-- [ ] 클라이언트 오류(WebGL 컨텍스트 손실·Worker 오류·소켓 재연결 실패) 수집 여부와 방법을 사용자가 정하고, 수집한다면 보내는 항목을 허용 목록으로 제한한다.
-- [ ] Render 로그 7일 보관([DEC-047](DECISIONS.md#결정-색인))을 유지할지 결과에 적는다.
+- [ ] 서버가 응답하지 않으면 UptimeRobot이 Discord로 알리고, 복구되면 다시 알린다(실제로 서비스를 멈춰 확인).
+- [ ] Alloy로 호스트 지표(CPU·메모리·디스크·전송량)와 앱 지표(동시 소켓·진행 중 경기·이벤트 루프 지연·`tick_skipped`·메모리·왕복 지연)가 Grafana Cloud에 들어오고 대시보드로 본다. 앱 지표 경로는 외부에 공개되지 않는다. Alloy 메모리 사용량을 기록한다.
+- [ ] 서버 로그가 Grafana Cloud에서 검색되고, 오류 로그에 요청 본문·쿠키·연결 문자열이 들어가지 않는다(테스트로 확인).
+- [ ] Sentry가 서버·브라우저 오류를 소스맵과 함께 수집하고, 보내는 항목은 허용 목록으로 제한한다.
+- [ ] 월 전송량과 R2 저장량이 한도의 80%를 넘으면 알림이 온다.
 
 검증 근거: 작업일의 worklog
 
@@ -240,14 +286,15 @@ Issue·PR: 미생성
 우선순위: P2
 상태: 예정
 담당: 미정
-의존성: CI-001
+의존성: CI-001, OPS-004
 범위: 설계만 있고 실행하지 않은 서비스 부하 기준선, 두 계정 온라인 흐름 E2E, 실패 주입을 실행한다. 합격 목표값은 정하지 않고 첫 측정을 기준선으로 보관한다([ENGINEERING-VALIDATION](ENGINEERING-VALIDATION.md#기준선부하-실험-절차)).
 관련 문서: [OPERATIONS 사용량·부하](design/OPERATIONS.md#사용량부하-확인), [ENGINEERING-VALIDATION](ENGINEERING-VALIDATION.md), [PRD 성공 기준](PRD.md#5-성공-기준)
 Issue·PR: 미생성
 
 수용 기준:
 
-- [ ] Socket.IO 부하 스크립트로 동시 방 수(1·3·5)와 스냅샷 주기(초당 10·20·30회)를 한 번에 하나씩 바꿔 CPU·이벤트 루프 지연·`tick_skipped`·스냅샷 전송 지연·송신 대역폭을 기록한다.
+- [ ] Socket.IO 부하 스크립트로 운영 VM에서 동시 방 수(1·5·25)와 스냅샷 주기(초당 10·20·30회)를 한 번에 하나씩 바꿔 CPU·이벤트 루프 지연·`tick_skipped`·스냅샷 전송 지연·송신 대역폭·메모리를 기록한다. 동시 25경기에서 `tick_skipped` 0건인지 판정한다([PRD 운영 기준](PRD.md#4-비기능-요구사항과-제약)).
+- [ ] 왕복 지연을 인위로 50·100·200·300ms 넣고 플레이해 조준·발사와 이동 중 방해요소 사용이 어느 지연부터 불편한지 기록하고, PRD의 지연 기준(목표 150ms·한계 500ms)과 비교한다.
 - [ ] 두 계정이 로그인 → 방 생성·입장 → 경기 종료 → 전적 반영까지 가는 브라우저 E2E가 CI에서 실행된다.
 - [ ] 서버 재시작 전후로 회원·전적이 일치하는지(PRD 성공 기준 4) 자동 테스트로 확인한다.
 - [ ] 소켓 끊김·DB 저장 실패를 주입해 전적이 한 번만 저장되고 사용자 안내가 나오는지 확인한다. 재사용할 진단이 나오면 TROUBLESHOOTING에 등록한다.
@@ -273,3 +320,43 @@ Issue·PR: 미생성
 - [ ] 다음 정기 패치 작업(2027-01)을 TASKS에 등록한다.
 
 검증 근거: 작업일의 worklog
+
+## POR-001 itch.io 배포
+
+우선순위: P1
+상태: 예정
+담당: 미정
+의존성: OPS-004, OPS-003
+범위: 포털 배포 1단계([DEC-097](DECISIONS.md#결정-색인), [PRD 배포 채널](PRD.md#16-배포-채널)). itch.io 페이지의 iframe(다른 도메인)에서 자체 도메인 서버로 로그인·온라인 대전을 할 수 있게 하고 클라이언트 빌드를 제출한다. 포털 iframe에서는 쿠키 세션이 전송되지 않는 브라우저가 있어 인증 방식을 바꿔야 한다. 인증 방식·게스트 범위는 미정이라 설계안을 만들어 사용자가 정한다.
+관련 문서: [AUTH](design/AUTH.md), [API](design/API.md), [DATABASE](design/DATABASE.md), [OPS-002 worklog의 포털 조사](worklogs/2026-11-26.md#ops-002-운영-인프라-재검토)
+Issue·PR: 미생성
+
+수용 기준:
+
+- [ ] 포털 빌드의 인증 방식(예: 토큰을 헤더·Socket.IO 연결 정보로 전달)과 게스트 범위를 사용자가 정하고 DEC·AUTH·API에 기록한다. 게스트는 DB에 저장하지 않는다.
+- [ ] 허용한 출처(자체 도메인, itch.io HTML 도메인)의 REST·Socket.IO 요청만 받고 그 밖의 출처는 거부한다.
+- [ ] 제3자 쿠키를 막는 브라우저(Safari 포함)에서 itch.io 페이지 안 로그인·온라인 대전·전적 반영이 된다.
+- [ ] itch.io용 빌드(서버 주소는 자체 도메인, 상대 경로)를 itch.io 업로드 제한 안에서 올리고 공개 페이지에서 두 계정 대전을 확인한다.
+- [ ] 기존 `npm test`·`npm run test:db`와 자체 도메인 접속이 그대로 동작한다.
+
+검증 근거: 작업일의 worklog
+
+## POR-002 CrazyGames 배포
+
+우선순위: P2
+상태: 예정
+담당: 미정
+의존성: POR-001
+범위: 포털 배포 2단계([DEC-097](DECISIONS.md#결정-색인)). CrazyGames 요구사항(자체 가입·외부 로그인 비활성, 게스트 플레이 기본, CrazyGames 사용자명 표시, SDK)에 맞춘 빌드를 제출한다. CrazyGames 연동 계정의 전적은 가입 계정처럼 DB에 남겨 백업 대상에 넣는다. SDK 광고·초대·즉시 멀티플레이 범위는 미정이다.
+관련 문서: [PRD 배포 채널](PRD.md#16-배포-채널), [OPS-002 worklog의 포털 조사](worklogs/2026-11-26.md#ops-002-운영-인프라-재검토)
+Issue·PR: 미생성
+
+수용 기준:
+
+- [ ] CrazyGames 요구사항과 이 게임의 차이를 정리하고, 광고·초대·계정 연동 범위를 사용자가 정해 PRD·DEC에 기록한다.
+- [ ] 서버가 CrazyGames 사용자 토큰을 공식 공개키(JWKS)와 `gameId`로 검증해 계정에 연결하고, 연동 계정의 전적이 DB에 남아 백업([OPS-005](#ops-005-db-백업복구))에 포함된다.
+- [ ] CrazyGames 빌드에서 자체 가입·로그인이 보이지 않고 게스트로 바로 플레이할 수 있다.
+- [ ] CrazyGames 출처의 요청만 추가로 허용하고 빌드를 제출한다(Basic Launch).
+
+검증 근거: 작업일의 worklog
+

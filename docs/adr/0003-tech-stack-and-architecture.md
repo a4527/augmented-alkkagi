@@ -4,7 +4,7 @@ DEC ID: [DEC-013](../DECISIONS.md#결정-색인)
 결정일: 2026-10-29
 상태: 승인
 동의 근거: 2026-10-29 사용자 메시지 "기술 스택, 아키텍처 결정 내용은 추천대로 진행할게"
-대체 관계: 기록 후 재생은 [DEC-016](../DECISIONS.md#결정-색인)·[ADR-0004](0004-realtime-hazards.md)가 대체했다. [DEC-003](../DECISIONS.md#결정-색인)의 "기술 미정 전환" 상태를 이 결정으로 해소한다.
+대체 관계: 기록 후 재생은 [DEC-016](../DECISIONS.md#결정-색인)·[ADR-0004](0004-realtime-hazards.md)가 대체했다. 배포(Render)·저장(Neon) 서비스와 무료 운영 조건은 [DEC-098](../DECISIONS.md#결정-색인)·[ADR-0005](0005-hosting-and-data.md)가 대체했다. [DEC-003](../DECISIONS.md#결정-색인)의 "기술 미정 전환" 상태를 이 결정으로 해소한다.
 
 ## 배경
 
