@@ -30,7 +30,7 @@
 ### 해시·프록시
 
 - **argon2id 파라미터**: `@node-rs/argon2` 기본값 대신 OWASP 최소 권장(메모리 19 MiB, 반복 2, 병렬 1)으로 시작하고 Render 무료 인스턴스의 해시 시간(목표 약 100~300ms)을 측정해 조정한다. 구현 때 이 PC(i5-1335U)에서는 해시 1회가 약 11ms였다. Render 무료 인스턴스에서 서버 안 로그로 11회 잰 결과 중앙값 약 311ms·평균 약 361ms(130~716ms)로 목표 상단에 걸쳐 **파라미터를 올리지 않고 그대로 둔다**([IMPL-013](../legacy/TASKS-team.md#impl-013-배포), [worklog](../worklogs/2026-11-05.md#impl-013-argon2id-해시-시간-서버-내-로그)). 더 내리면 OWASP 최소 권장 아래가 된다. 인스턴스 사양이 바뀌면 `argon2_timing` 로그로 다시 확인한다.
-- **프록시 신뢰**: `app.set('trust proxy', 1)`(Render 프록시 1단). 새 구성에서는 Cloudflare → Caddy 두 단계라 [OPS-003](../TASKS.md#ops-003-배포-자동화)에서 바꾼다([DEC-098](../DECISIONS.md#결정-색인)). `secure` 쿠키와 IP 제한이 이에 의존한다. 운영 설정에서 `X-Forwarded-Proto: https`가 있을 때 세션 쿠키에 `Secure`가 붙는 것을 테스트로 확인했다.
+- **프록시 신뢰**: `app.set('trust proxy', TRUST_PROXY_HOPS)`(기본 1). 운영은 Cloudflare → Caddy 두 단계라 Compose가 2를 넣는다([DEC-098](../DECISIONS.md#결정-색인), [OPERATIONS 서버 구성 파일](OPERATIONS.md#서버-구성-파일)). Caddy는 Cloudflare 대역에서 온 요청에만 `X-Forwarded-For`를 이어 붙이므로, 서버가 오른쪽에서 두 단계를 건너 읽은 값이 Cloudflare가 본 접속자 IP다. 이전 Render 구성은 1단이었다. 운영에서의 확인은 [OPS-003](../TASKS.md#ops-003-배포-자동화)이다. `secure` 쿠키와 IP 제한이 이에 의존한다. 운영 설정에서 `X-Forwarded-Proto: https`가 있을 때 세션 쿠키에 `Secure`가 붙는 것을 테스트로 확인했다.
 - **환경 변수**: `SESSION_SECRET`은 32자 이상이어야 서버가 시작한다. 교체 중에만 이전 값을 `SESSION_SECRET_PREVIOUS`(32자 이상, 현재 값과 달라야 함)로 함께 둔다. 새 쿠키는 현재 값으로 서명하고 검증은 두 값으로 한다. 절차는 [OPERATIONS 세션 비밀값 교체](OPERATIONS.md#세션-비밀값-교체)다. 값은 문서·로그에 남기지 않는다([OPERATIONS](OPERATIONS.md)).
 
 ### Socket.IO 인증·중복 접속

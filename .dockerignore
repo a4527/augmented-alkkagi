@@ -1,0 +1,16 @@
+# 빌드 맥락에서 뺀다. 비밀값(.env)과 로컬 산출물이 이미지에 들어가지 않게 한다.
+.git
+.github
+node_modules
+**/node_modules
+**/dist
+.env
+.env.*
+!.env.example
+docs
+deploy
+coverage
+*.tsbuildinfo
+*.html
+!packages/client/index.html
+!packages/client/*-harness.html

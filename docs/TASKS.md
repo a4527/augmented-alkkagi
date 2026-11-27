@@ -30,7 +30,7 @@
 | [CI-001](#ci-001-pr-검사-자동화) | PR 검사 자동화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6), [PR #12](https://github.com/a4527/augmented-alkkagi/pull/12) |
 | [SEC-001](#sec-001-서버-보안-강화) | 서버 보안 강화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/a4527/augmented-alkkagi/pull/14) |
 | [OPS-002](#ops-002-0원-호스팅-재검토) | 0원 호스팅 재검토 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #13](https://github.com/a4527/augmented-alkkagi/pull/13) |
-| [OPS-004](#ops-004-운영-서버-구축) | 운영 서버 구축 | P1 | OPS-002 | 예정 | 미정 | 미생성 |
+| [OPS-004](#ops-004-운영-서버-구축) | 운영 서버 구축 | P1 | OPS-002 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
 | [OPS-005](#ops-005-db-백업복구) | DB 백업·복구 | P1 | OPS-004 | 예정 | 미정 | 미생성 |
 | [OPS-003](#ops-003-배포-자동화) | 배포 자동화 | P1 | CI-001, OPS-004 | 예정 | 미정 | 미생성 |
 | [OBS-001](#obs-001-모니터링알림) | 모니터링·알림 | P1 | OPS-004 | 예정 | 미정 | 미생성 |
@@ -205,7 +205,7 @@ Issue·PR: [PR #13](https://github.com/a4527/augmented-alkkagi/pull/13)
 상태: 예정
 담당: 미정
 의존성: CI-001, OPS-004
-범위: [DEC-094](DECISIONS.md#결정-색인)에 따라 `main`의 커밋이 CI를 통과하면 자동으로 배포하고, 배포 뒤 상태를 확인하고, 실패를 알린다. 대상은 [DEC-098](DECISIONS.md#결정-색인)의 VM(Docker Compose)이며 이미지 저장소·배포 방법(예: GHCR + SSH)은 이 작업에서 정한다. 진행 중 경기는 배포 때 끊기는 현행 정책을 유지하고 이용자가 적은 시간에 배포한다([DEC-096](DECISIONS.md#결정-색인)). 프록시가 Cloudflare → Caddy 두 단계가 되므로 클라이언트 IP 판별과 `trust proxy`를 함께 바꾼다.
+범위: [DEC-094](DECISIONS.md#결정-색인)에 따라 `main`의 커밋이 CI를 통과하면 자동으로 배포하고, 배포 뒤 상태를 확인하고, 실패를 알린다. 대상은 [DEC-098](DECISIONS.md#결정-색인)의 VM(Docker Compose)이며 이미지 저장소·배포 방법(예: GHCR + SSH)은 이 작업에서 정한다. 진행 중 경기는 배포 때 끊기는 현행 정책을 유지하고 이용자가 적은 시간에 배포한다([DEC-096](DECISIONS.md#결정-색인)). 프록시 단계 설정(`TRUST_PROXY_HOPS`, 운영 2)은 OPS-004에서 넣었고 여기서는 운영에서 클라이언트 IP 판별을 확인한다.
 관련 문서: [OPERATIONS 배포·롤백](design/OPERATIONS.md#배포롤백), [DATABASE 마이그레이션](design/DATABASE.md#마이그레이션), [AUTH](design/AUTH.md)
 Issue·PR: 미생성
 
@@ -223,8 +223,8 @@ Issue·PR: 미생성
 ## OPS-004 운영 서버 구축
 
 우선순위: P1
-상태: 예정
-담당: 미정
+상태: 진행 중
+담당: Claude — 사용자 요청 수행
 의존성: OPS-002
 범위: [DEC-098](DECISIONS.md#결정-색인)·[ADR-0005](adr/0005-hosting-and-data.md)의 VM·도메인·Compose 구성을 만들고 서버·DB를 띄운다. 백업은 [OPS-005](#ops-005-db-백업복구), 자동 배포는 [OPS-003](#ops-003-배포-자동화), 모니터링은 [OBS-001](#obs-001-모니터링알림)에서 한다. 계정 생성·결제·비밀값 입력은 사용자가 하고 Claude는 설정 파일·절차를 준비한다.
 관련 문서: [OPERATIONS 운영 구성](design/OPERATIONS.md#운영-구성-승인-미구현), [PRD 비기능 요구사항](PRD.md#4-비기능-요구사항과-제약)
@@ -240,6 +240,8 @@ Issue·PR: 미생성
 - [ ] 두 계정으로 로그인 → 방 생성·입장 → 경기 종료 → 전적 반영까지 확인한다.
 - [ ] 운영 도메인 응답에 HSTS가 붙고, Cloudflare·Caddy를 거친 Socket.IO 연결이 출처 확인(`Host` 유지)을 통과하며 브라우저에 CSP 위반이 없다([SEC-001](#sec-001-서버-보안-강화)).
 - [ ] 기존 Neon 데이터 이전 여부를 사용자가 정하고, 이전 운영 서비스(Render·Neon·UptimeRobot 절전 방지 요청)를 정리한다. README 배포 접속 절을 새 주소로 고친다.
+
+진행: 구성 파일·구축 순서·프록시 단계 설정을 준비했다([2026-11-27 worklog](worklogs/2026-11-27.md#ops-004-운영-서버-구축)). 주문 전 확인부터 사용자 차례다.
 
 검증 근거: 작업일의 worklog
 

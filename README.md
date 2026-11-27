@@ -91,6 +91,52 @@ DB 테스트는 `DATABASE_URL`이 설정된 환경에서 `npm run test:db`로 �
 
 2026-11-26 사용자 본인 계정의 새 구성으로 운영을 다시 열기로 했다([DEC-098](docs/DECISIONS.md#결정-색인), [ADR-0005](docs/adr/0005-hosting-and-data.md)): HostHatch VM에 서버·DB를 두고 자체 도메인(Cloudflare)으로 연결하며, itch.io를 시작으로 게임 포털에도 제출한다([DEC-097](docs/DECISIONS.md#결정-색인)). 주소는 구축([OPS-004](docs/TASKS.md#ops-004-운영-서버-구축)) 뒤 여기에 적는다. 배포·백업·모니터링 절차는 [OPERATIONS](docs/design/OPERATIONS.md)를 따른다. 그동안은 [서버 없이 AI·로컬 2인 실행](#서버-없이-ai로컬-2인-실행)으로 플레이한다.
 
+### 운영 서버 구축
+
+[OPS-004](docs/TASKS.md#ops-004-운영-서버-구축)의 구축 순서다. 구성과 선택 이유는 [OPERATIONS 서버 구성 파일](docs/design/OPERATIONS.md#서버-구성-파일)에 있다. 비밀값은 VM의 `/opt/alkkagi/.env`와 `/opt/alkkagi/certs`에만 두고 저장소·문서·채팅에 남기지 않는다.
+
+1. **주문 전 확인**: HostHatch에 가입해 주문 화면에서 서울(차선 도쿄) "NVMe 2 GB"의 월 가격·결제 주기·부가세와 약관의 CPU 사용 제한을 확인한다. 월 결제가 안 되거나, 부가세·도메인(`.com` 연 약 $10.5)을 합쳐 월 1만 원을 넘거나, 상시 CPU 사용 제한이 있으면 주문하지 않고 대체안([ADR-0005](docs/adr/0005-hosting-and-data.md#선택과-핵심-조건))으로 간다.
+2. **도메인**: 도메인을 사서 Cloudflare에 연결한다(Cloudflare Registrar면 자동).
+3. **VM 주문**: Ubuntu 24.04 LTS, SSH 공개 키를 등록한다.
+4. **Cloudflare 설정**: DNS에 VM IP의 A(IPv6가 있으면 AAAA) 레코드를 프록시 켬(주황 구름)으로 만든다. SSL/TLS 모드는 Full (strict), Edge Certificates의 Always Use HTTPS를 켠다. Origin Server에서 Origin CA 인증서(도메인과 `*.도메인`)를 만들어 인증서·개인 키를 받아 둔다.
+5. **VM 초기 설정**(root로 SSH 접속):
+
+   ```bash
+   apt-get update && apt-get -y install git
+   git clone https://github.com/a4527/augmented-alkkagi.git /opt/alkkagi/app
+   bash /opt/alkkagi/app/deploy/vm-setup.sh deploy
+   ```
+
+   새 터미널에서 `ssh deploy@<VM IP>`가 되는지 확인한 뒤 root 세션을 닫는다. 이후는 `deploy` 계정으로 한다.
+
+6. **인증서·환경 파일**:
+
+   ```bash
+   sudo chown -R deploy:deploy /opt/alkkagi/app
+   sudo nano /opt/alkkagi/certs/origin.pem   # 4단계의 인증서
+   sudo nano /opt/alkkagi/certs/origin.key   # 4단계의 개인 키
+   sudo chmod 600 /opt/alkkagi/certs/*
+   cp /opt/alkkagi/app/deploy/env.example /opt/alkkagi/.env && chmod 600 /opt/alkkagi/.env
+   nano /opt/alkkagi/.env                     # 도메인, openssl rand로 만든 비밀값
+   ```
+
+7. **설정 검사와 실행**:
+
+   ```bash
+   cd /opt/alkkagi/app
+   COMPOSE="docker compose --env-file /opt/alkkagi/.env -f deploy/compose.yaml"
+   $COMPOSE config --quiet
+   docker run --rm -e ALKKAGI_DOMAIN="$(grep '^ALKKAGI_DOMAIN=' /opt/alkkagi/.env | cut -d= -f2)" \
+     -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" \
+     -v /opt/alkkagi/caddy/cloudflare-trusted.caddy:/etc/caddy/cloudflare-trusted.caddy:ro \
+     -v /opt/alkkagi/certs:/certs:ro caddy:2 caddy validate --config /etc/caddy/Caddyfile
+   $COMPOSE up -d --build
+   $COMPOSE ps
+   curl -fsS https://<도메인>/health
+   ```
+
+   두 검사가 오류 없이 끝나야 실행한다. 서버를 다시 빌드·실행할 때는 `git pull` 뒤 `$COMPOSE up -d --build`를 쓴다(자동 배포는 [OPS-003](docs/TASKS.md#ops-003-배포-자동화)).
+
 ## 출처
 
 이 프로젝트는 2026-10-27 두 개발자가 [팀 저장소](https://github.com/moguab2808-commits/mini-project-1-1)에서 함께 시작한 미니프로젝트이며, 2026-11-25부터 이 저장소에서 개인 프로젝트로 이어 간다([DEC-091](docs/DECISIONS.md#결정-색인)). 전환 전의 기획·설계·구현은 두 사람의 공동 작업이고, 기여 내역은 Git 이력과 팀 저장소의 Issue·PR에 남아 있다. 문서의 "개발자 A·B"는 당시 담당 구분이다. 협업 규칙은 [CONTRIBUTING](docs/CONTRIBUTING.md)을 따른다.

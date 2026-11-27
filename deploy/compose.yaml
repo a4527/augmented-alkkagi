@@ -1,0 +1,89 @@
+# 운영 구성(OPS-004, OPERATIONS 운영 구성·서버 구축 절차). VM에서 저장소 루트를 기준으로 실행한다:
+#   docker compose --env-file /opt/alkkagi/.env -f deploy/compose.yaml up -d --build
+# 비밀값은 저장소 밖 /opt/alkkagi/.env(권한 600)에만 둔다. 이 파일에는 값을 적지 않는다.
+name: alkkagi
+
+x-logging: &logging # 디스크 10GB 예산: 컨테이너마다 로그 10MB × 3개까지 둔다.
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '3'
+
+services:
+  postgres:
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: alkkagi
+      POSTGRES_DB: alkkagi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD가 필요하다}
+    # 서버 연결 풀은 5개(db/pool.ts)다. 2GB VM에 맞춰 연결 수를 줄인다.
+    command: ['postgres', '-c', 'max_connections=20', '-c', 'shared_buffers=128MB']
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # 포트를 열지 않는다. 서버만 내부 네트워크로 접속한다.
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U alkkagi -d alkkagi']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 512m
+    logging: *logging
+
+  server:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: alkkagi-server:local
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: '3000'
+      # Cloudflare → Caddy 두 단계 뒤에서 클라이언트 IP·HTTPS 여부를 읽는다(AUTH 해시·프록시).
+      TRUST_PROXY_HOPS: '2'
+      # 비밀번호는 URL에 그대로 들어가므로 영숫자(openssl rand -hex)로 만든다.
+      DATABASE_URL: postgres://alkkagi:${POSTGRES_PASSWORD}@postgres:5432/alkkagi
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET이 필요하다}
+      SESSION_SECRET_PREVIOUS: ${SESSION_SECRET_PREVIOUS:-}
+      NODE_OPTIONS: --max-old-space-size=384
+    # Caddy(호스트 네트워크)만 닿도록 루프백에만 연다.
+    ports:
+      - 127.0.0.1:3000:3000
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    mem_limit: 512m
+    logging: *logging
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    # 호스트 네트워크로 443만 받는다. Docker가 공개한 포트는 ufw를 우회하므로 포트 공개 대신 이렇게 둔다.
+    network_mode: host
+    depends_on:
+      - server
+    environment:
+      ALKKAGI_DOMAIN: ${ALKKAGI_DOMAIN:?ALKKAGI_DOMAIN이 필요하다}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - /opt/alkkagi/caddy/cloudflare-trusted.caddy:/etc/caddy/cloudflare-trusted.caddy:ro
+      - /opt/alkkagi/certs:/certs:ro
+      - caddy_data:/data
+    mem_limit: 128m
+    logging: *logging
+
+volumes:
+  pgdata:
+  caddy_data:

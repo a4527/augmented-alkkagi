@@ -1,0 +1,18 @@
+# Caddy: Cloudflare에서 오는 HTTPS·WSS를 받아 서버로 넘긴다(OPS-004, OPERATIONS 운영 구성).
+# 인증서는 Cloudflare Origin CA 인증서이고 Cloudflare SSL 모드는 Full (strict)다. 그래서 ACME·자동 HTTPS를 끈다.
+{
+	admin off
+	auto_https off
+	servers {
+		# Cloudflare IP 대역(deploy/cloudflare-ips.sh가 만든다)에서 온 요청만 X-Forwarded-For를 이어 붙인다.
+		# 서버는 TRUST_PROXY_HOPS=2로 그 앞의 클라이언트 IP를 읽는다.
+		import /etc/caddy/cloudflare-trusted.caddy
+	}
+}
+
+https://{$ALKKAGI_DOMAIN} {
+	tls /certs/origin.pem /certs/origin.key
+	encode zstd gzip
+	# WebSocket 업그레이드는 reverse_proxy가 그대로 넘긴다. 접근 로그는 남기지 않는다(서버 로그 허용 목록 원칙).
+	reverse_proxy 127.0.0.1:3000
+}

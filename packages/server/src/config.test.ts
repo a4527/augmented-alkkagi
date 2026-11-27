@@ -28,4 +28,12 @@ describe('서버 설정', () => {
       expect((error as Error).message).not.toContain(base.SESSION_SECRET);
     }
   });
+
+  it('프록시 단계 수는 기본 1이고 0~5 정수만 받는다', () => {
+    expect(loadConfig(base).trustProxyHops).toBe(1);
+    expect(loadConfig({ ...base, TRUST_PROXY_HOPS: '2' }).trustProxyHops).toBe(2);
+    for (const bad of ['-1', '6', '1.5', 'two']) {
+      expect(() => loadConfig({ ...base, TRUST_PROXY_HOPS: bad })).toThrow(/TRUST_PROXY_HOPS/);
+    }
+  });
 });

@@ -5,7 +5,7 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 (2026-11-26) | 아래 [운영 구성](#운영-구성-승인-미구현)([DEC-098](../DECISIONS.md#결정-색인), [ADR-0005](../adr/0005-hosting-and-data.md)), [모니터링](#모니터링)([DEC-099](../DECISIONS.md#결정-색인)), CI 통과 후 자동 배포·배포 뒤 확인·실패 알림([DEC-094](../DECISIONS.md#결정-색인)). 구현 작업은 [OPS-004](../TASKS.md#ops-004-운영-서버-구축)·[OPS-005](../TASKS.md#ops-005-db-백업복구)·[OPS-003](../TASKS.md#ops-003-배포-자동화)·[OBS-001](../TASKS.md#obs-001-모니터링알림) |
-| 현재 구현 | 의존성 취약점 알림과 월 1회 정기 패치([DEC-095](../DECISIONS.md#결정-색인), 아래 [의존성·취약점 관리](#의존성취약점-관리)). 운영 서비스는 없다: 이전 구성(Render·Neon)의 서비스는 2026-11-25 확인 시 소유자 일시 중지 상태이고 새 구성이 가동되면 끝낸다 |
+| 현재 구현 | 운영 서버 구성 파일([서버 구성 파일](#서버-구성-파일), VM 미구축). 의존성 취약점 알림과 월 1회 정기 패치([DEC-095](../DECISIONS.md#결정-색인), 아래 [의존성·취약점 관리](#의존성취약점-관리)). 운영 서비스는 없다: 이전 구성(Render·Neon)의 서비스는 2026-11-25 확인 시 소유자 일시 중지 상태이고 새 구성이 가동되면 끝낸다 |
 | 확정 (OPS-001 완료) | 아래 [서버 로그](#서버-로그)·[서버 시작 시 `rooms` 정리](#서버-시작-시-rooms-정리) 등 [OPS-001](../legacy/TASKS-team.md#ops-001-운영-설계-확정) 세부 절차 중 새 구성에서도 유지하는 항목 |
 | 미정 | 아래 [남은 미정](#남은-미정구현-단계-확인) |
 
@@ -28,13 +28,31 @@
 ```
 
 - **서버**: HostHatch 2GB VM 1대. 주문할 때 위치별 월 가격·결제 주기·부가세·공유 CPU 약관을 확인하고([비용·한도 확인](#비용한도-확인-2026-11-26)), 조건이 어긋나면 대체안(Vultr 서울 1GB + Supabase 서울 무료 + 1시간 덤프)으로 간다.
-- **도메인·앞단**: 자체 도메인을 Cloudflare 무료 DNS·프록시로 운영한다. 포털 빌드에 고정되는 서버 주소는 이 도메인이다. 프록시가 Cloudflare → Caddy 두 단계가 되므로 `trust proxy`와 클라이언트 IP 판별을 바꾼다([OPS-003](../TASKS.md#ops-003-배포-자동화)).
+- **도메인·앞단**: 자체 도메인을 Cloudflare 무료 DNS·프록시로 운영한다. 포털 빌드에 고정되는 서버 주소는 이 도메인이다. 프록시가 Cloudflare → Caddy 두 단계라 서버는 `TRUST_PROXY_HOPS=2`로 클라이언트 IP를 읽는다([AUTH 해시·프록시](AUTH.md#해시프록시), 아래 [서버 구성 파일](#서버-구성-파일)).
 - **DB**: 같은 VM의 PostgreSQL. 진행 중 경기 상태는 서버 메모리, 방 정보(`rooms`)·회원·전적·세션은 DB에 둔다([DEC-023](../DECISIONS.md#결정-색인)). 게스트는 저장하지 않는다([DEC-097](../DECISIONS.md#결정-색인)).
-- **환경 설정 이름**: `DATABASE_URL`, `SESSION_SECRET`, `PORT`, `NODE_ENV`. 로컬은 `.env`와 값이 없는 `.env.example`을 쓰고, 운영 값은 VM의 저장소 밖 환경 파일과 GitHub 비밀 저장소에만 둔다. 값과 비밀정보는 문서에 기록하지 않는다.
+- **환경 설정 이름**: 서버는 `DATABASE_URL`, `SESSION_SECRET`, `SESSION_SECRET_PREVIOUS`(교체 중에만), `PORT`, `NODE_ENV`, `TRUST_PROXY_HOPS`를 읽는다. 운영 Compose는 VM의 `/opt/alkkagi/.env`에서 `ALKKAGI_DOMAIN`, `POSTGRES_PASSWORD`, `SESSION_SECRET`(·`SESSION_SECRET_PREVIOUS`)를 받아 나머지를 채운다([`deploy/env.example`](../../deploy/env.example)). 로컬은 `.env`와 값이 없는 `.env.example`을 쓰고, 운영 값은 VM의 저장소 밖 환경 파일과 GitHub 비밀 저장소에만 둔다. 값과 비밀정보는 문서에 기록하지 않는다.
 - **메모리 예산**: OS·Docker, Caddy, Node, PostgreSQL, Alloy를 2GB 안에 둔다. 각 사용량은 추정이라 구축 때 측정한다([OPS-004](../TASKS.md#ops-004-운영-서버-구축)).
 - **디스크(10GB)**: Docker 이미지 정리, 로그 순환, 로컬 WAL 보관 상한을 둔다.
 - 기존 시뮬레이션 기록 30fps 샘플링은 기록 후 재생 기준이었다. 이동 중 방해요소 입력을 위한 실시간 방식은 [ADR-0004](../adr/0004-realtime-hazards.md)로 승인됐다. 전송 주기는 물리와 분리하며 부하 측정으로 정한다(아래 사용량·부하).
 - 오디오는 브라우저 입력 후 활성화한다.
+
+### 서버 구성 파일
+
+[OPS-004](../TASKS.md#ops-004-운영-서버-구축)에서 만든 파일이다. 구축 순서는 [README 운영 서버 구축](../../README.md#운영-서버-구축)에 있다.
+
+| 파일 | 내용 |
+| --- | --- |
+| [`Dockerfile`](../../Dockerfile) | 빌드 단계에서 `npm ci`·`npm run build` 뒤 개발 의존성을 지우고, 실행 단계(`node:24-bookworm-slim`, `node` 사용자)에는 운영 의존성·서버 번들·마이그레이션·클라이언트 빌드만 둔다 |
+| [`deploy/compose.yaml`](../../deploy/compose.yaml) | `postgres`(17, 포트 비공개, 볼륨 `pgdata`), `server`(루프백 3000만 공개), `caddy`(호스트 네트워크 443). 모두 `restart: unless-stopped`, 컨테이너 로그 10MB×3 |
+| [`deploy/Caddyfile`](../../deploy/Caddyfile) | Cloudflare Origin CA 인증서로 TLS를 받고 서버로 넘긴다. 관리 API·자동 HTTPS·접근 로그를 끈다. Cloudflare 대역만 신뢰 프록시로 둔다 |
+| [`deploy/vm-setup.sh`](../../deploy/vm-setup.sh) | 새 VM 한 번 설정: 패키지 갱신·자동 보안 업데이트, 운영 계정(sudo·docker), SSH 키 로그인만, 스왑 2GB, Docker 공식 저장소, ufw |
+| [`deploy/cloudflare-ips.sh`](../../deploy/cloudflare-ips.sh) | Cloudflare IP 대역으로 ufw 443 규칙과 Caddy 신뢰 프록시 목록을 만든다. 대역이 바뀌면 다시 실행한다 |
+
+- **TLS**: Cloudflare SSL 모드를 Full (strict)로 두고 VM의 Caddy는 Cloudflare Origin CA 인증서(도메인·와일드카드, 15년)를 쓴다. 그래서 Cloudflare와 서버 사이도 검증된 TLS이고, 인증서 자동 발급(ACME)이 필요 없다. Origin CA 인증서는 Cloudflare 프록시를 거친 요청에서만 브라우저가 믿는다.
+- **방화벽**: 22는 어디서나(SSH 키만), 443은 Cloudflare 대역만 연다. 80은 열지 않는다(HTTP→HTTPS는 Cloudflare "Always Use HTTPS"). Docker가 공개한 포트는 ufw를 우회하므로 Caddy는 호스트 네트워크로 두고 서버는 루프백에만, DB는 포트를 공개하지 않는다.
+- **클라이언트 IP**: Cloudflare가 붙인 `X-Forwarded-For` 뒤에 Caddy가 Cloudflare 엣지 IP를 덧붙인다(신뢰 프록시일 때만). 서버는 오른쪽에서 두 단계(`TRUST_PROXY_HOPS=2`)를 건너 클라이언트 IP를 읽고, 클라이언트가 위조해 보낸 앞쪽 값은 쓰지 않는다(`auth/proxy.test.ts`).
+- **메모리 상한(초기값)**: DB 512MB, 서버 512MB(Node 힙 384MB), Caddy 128MB. 구축 뒤 대기·경기 중 사용량을 재서 고친다. PostgreSQL은 `max_connections=20`, `shared_buffers=128MB`다.
+- **이미지 빌드**: OPS-004에서는 VM이 저장소를 받아 직접 빌드한다(스왑 2GB 전제). 이미지 저장소·자동 배포는 [OPS-003](../TASKS.md#ops-003-배포-자동화)에서 바꾼다. 기반 이미지는 메이저 태그(`node:24-bookworm-slim`·`postgres:17-bookworm`·`caddy:2`)이며 고정 여부는 OPS-003에서 정한다.
 
 이전 구성(Render 무료 웹 서비스 + Neon 무료 + UptimeRobot 절전 방지 요청, [DEC-013](../DECISIONS.md#결정-색인)·[DEC-047](../DECISIONS.md#결정-색인))은 DEC-098로 대체됐다. 이전 절차의 원문은 Git 이력으로 추적한다.
 
