@@ -56,7 +56,7 @@
 - 처리하지 못한 서버 오류는 `500 { error: { code: "INTERNAL_ERROR", message } }`로 응답한다. 원인은 응답에 싣지 않고 서버 로그에만 남긴다. 아래 코드 표의 클라이언트 분기 대상이 아니라 일반 오류 안내로 처리한다. 코드 표의 기준은 이 문서다. `shared`는 게임(`protocol.ts`의 `ERROR_CODES`)과 REST(`auth.ts`의 `AUTH_ERROR_CODES`)로 나눠 구현하며 `INVALID_INPUT`과 `INTERNAL_ERROR`는 양쪽에 있다. 경기 명령 ack도 처리 중 예외가 나면 `INTERNAL_ERROR`인 `CommandResult`로 응답한다([DEC-043](../DECISIONS.md#결정-색인)).
 - Socket.IO 명령은 ack 콜백으로 `{ ok: true, … }` 또는 `{ ok: false, error: { code, message } }`를 돌려준다.
 - 거부된 명령은 경기 상태와 난수를 바꾸지 않는다.
-- `RATE_LIMITED`(REST 429)에는 `Retry-After` 헤더(초)가 붙는다. `room:join` ack의 `RATE_LIMITED`에는 없다.
+- `RATE_LIMITED`(REST 429)에는 `Retry-After` 헤더(초)가 붙는다. `room:join`·경기 명령 ack의 `RATE_LIMITED`에는 없다.
 
 | 코드 | 사용처 |
 | --- | --- |
@@ -64,7 +64,7 @@
 | `UNAUTHENTICATED` | 로그인하지 않았거나 세션이 만료됨 |
 | `INVALID_CREDENTIALS` | 로그인·비밀번호 변경 실패. 닉네임 없음과 비밀번호 틀림을 구분하지 않는다 |
 | `NICKNAME_TAKEN` | 가입 시 닉네임 중복 |
-| `RATE_LIMITED` | 인증 요청 빈도 제한 초과 ([AUTH](AUTH.md#인증-요청-빈도-제한)), `room:join` 사용자당 빈도 제한 초과 |
+| `RATE_LIMITED` | 인증 요청 빈도 제한 초과 ([AUTH](AUTH.md#인증-요청-빈도-제한)), `room:join` 사용자당 빈도 제한 초과, 경기 명령(`shot:submit`·`hazard:use`·`board:rotate`·`game:forfeit`·`emote:send`·`rematch:request`) 사용자별 빈도 제한 초과 ([AUTH](AUTH.md#경기-입력-빈도-제한)) |
 | `INVALID_CODE` | 비공개 방 코드가 맞지 않음. 비공개 방에 방 id만 보내 입장할 때도 쓴다 |
 | `ROOM_PLAYING` | 이미 상대가 입장해 게임이 시작된 방. 상대가 입장하면 바로 시작하므로(DEC-040) 상대가 있는 방은 항상 게임 중이다 |
 | `ROOM_NOT_FOUND` | 없는 방, 즉시 참가할 수 있는 방이 없음 |
@@ -91,6 +91,7 @@
 ### Socket.IO 이벤트
 
 - 연결 시 세션으로 사용자를 인증하며, 로그인하지 않은 사용자는 연결을 거부한다.
+- 다른 출처(`Origin`의 호스트가 `Host`와 다름)의 핸드셰이크는 HTTP 403으로 거부하고, 4 KiB를 넘는 메시지는 처리하지 않고 연결을 끊는다([AUTH](AUTH.md#socketio-인증중복-접속)).
 - 모든 C → S 명령은 ack 콜백으로 결과를 받는다. commandId를 두지 않는다. 발사는 gameId·turnId, 방해요소는 gameId·hazardInstanceId로 오래된 명령을 거부한다 ([GAME](GAME.md#명령-경합과-시간), [DEC-026](../DECISIONS.md#결정-색인)). 발사 검증은 최종 발사값만 본다. 조준 상태는 상대 화면의 캐릭터 몸짓 표시용으로만 `aim:update`→`aim:state`로 중계하며 ack 없이 volatile로 보낸다([DEC-036](../DECISIONS.md#결정-색인)).
 - AI 대전은 브라우저에서 실행하므로 서버 이벤트가 없다 (`ai:start` 삭제, [DEC-021](../DECISIONS.md#결정-색인)). 방 목록 구독 이벤트(`lobby:*`)도 없다([DEC-024](../DECISIONS.md#결정-색인)).
 - 같은 계정의 새 연결이 생기면 기존 연결에 `session:replaced`를 보내고 끊는다.
@@ -118,7 +119,7 @@
 | S → C | `rematch:state` | 재도전 진행 상태 |
 | C → S | `board:rotate` | 기본 판 돌리기 `{ gameId, turnId, deltaDeg }`(양수 반시계, \|Δ\| ≤ 90). ack: `{ ok: true }` 또는 `INVALID_INPUT`·`GAME_NOT_ACTIVE`·`STALE_TURN`·`NOT_YOUR_TURN`·`BOARD_ROTATE_NOT_ALLOWED`. 속도 한도를 넘는 Δ는 잘라 적용 (제안, DEC-036) |
 | C → S | `hazard:aim` | 발동 중인 후레쉬·물총 조준점 `{ gameId, hazardInstanceId, target: { x, y, h } }`. ack 없음, volatile (제안, DEC-036) |
-| C → S | `aim:update` | 내 조준·몸짓 상태 `{ gameId, mode, stoneId?, angle?, power?, kind?, target? }`. ack 없음, volatile, 초당 20회 이하 (제안, DEC-036) |
+| C → S | `aim:update` | 내 조준·몸짓 상태 `{ gameId, mode, stoneId?, angle?, power?, kind?, target? }`. ack 없음, volatile, 초당 20회 이하. 서버는 사용자별 초당 30회를 넘는 입력을 중계하지 않는다([AUTH](AUTH.md#경기-입력-빈도-제한)) (제안, DEC-036) |
 | S → C | `aim:state` | 상대의 `aim:update`에 `seat`를 붙여 상대에게만 중계 (제안, DEC-036) |
 | S → C | `session:replaced` | 다른 접속으로 대체되어 로그아웃됨 |
 | C → S | `emote:send` | 감정표현 보내기 (로컬·AI·온라인, [감정표현 필드](#감정표현-필드-emote-001)) |

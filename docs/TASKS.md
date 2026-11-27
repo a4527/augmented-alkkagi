@@ -28,7 +28,7 @@
 | [DOC-015](#doc-015-포트폴리오-1부-단일-html) | 포트폴리오 1부 단일 HTML | P2 | 없음 | 완료 | Claude — 사용자 요청 수행 | 미생성 |
 | [DOC-016](#doc-016-운영-보완-결정과-작업-등록) | 운영 보완 결정과 작업 등록 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6) |
 | [CI-001](#ci-001-pr-검사-자동화) | PR 검사 자동화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6), [PR #12](https://github.com/a4527/augmented-alkkagi/pull/12) |
-| [SEC-001](#sec-001-서버-보안-강화) | 서버 보안 강화 | P1 | 없음 | 예정 | 미정 | 미생성 |
+| [SEC-001](#sec-001-서버-보안-강화) | 서버 보안 강화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/a4527/augmented-alkkagi/pull/14) |
 | [OPS-002](#ops-002-0원-호스팅-재검토) | 0원 호스팅 재검토 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #13](https://github.com/a4527/augmented-alkkagi/pull/13) |
 | [OPS-004](#ops-004-운영-서버-구축) | 운영 서버 구축 | P1 | OPS-002 | 예정 | 미정 | 미생성 |
 | [OPS-005](#ops-005-db-백업복구) | DB 백업·복구 | P1 | OPS-004 | 예정 | 미정 | 미생성 |
@@ -163,23 +163,23 @@ Issue·PR: [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6), [PR #12](
 ## SEC-001 서버 보안 강화
 
 우선순위: P1
-상태: 예정
-담당: 미정
+상태: 완료
+담당: Claude — 사용자 요청 수행
 의존성: 없음
 범위: HTTP 보안 헤더와 Socket.IO 연결·메시지 경계를 강화한다. 대상은 출처 확인, 메시지 크기, 경기 명령·조준 스트림 빈도 제한이다. 사용자당 소켓 연결은 이미 1개로 대체되므로(`realtime/connections.ts`) 연결 수 제한은 범위에서 뺀다. 인증 방식·세션 정책은 바꾸지 않는다. 포털 출처 허용은 [POR-001](#por-001-itchio-배포)에서 다룬다.
 관련 문서: [AUTH](design/AUTH.md), [API](design/API.md), [ENGINEERING-VALIDATION 비공개 정보·권한](ENGINEERING-VALIDATION.md#최소-측정-항목)
-Issue·PR: 미생성
+Issue·PR: [PR #14](https://github.com/a4527/augmented-alkkagi/pull/14)
 
 수용 기준:
 
-- [ ] 응답에 CSP·`X-Content-Type-Options`·`Referrer-Policy`, 운영에서 HSTS가 붙는다. 로그인·로비·온라인 경기·로컬 2인·AI 대전 화면(Worker·SharedWorker·WebGL·오디오·글꼴·영상)이 CSP 위반 없이 동작한다.
-- [ ] 허용하지 않은 출처(Origin)의 Socket.IO 연결이 거부되고, 같은 출처 연결은 그대로 된다.
-- [ ] Socket.IO 메시지 크기 상한을 기본값(1MB)에서 실제 최대 메시지에 맞춰 줄이고, 넘는 메시지는 처리하지 않는다.
-- [ ] 경기 명령(`shot:submit` 등)과 응답 없는 스트림(`aim:update`·`hazard:aim`)에 사용자별 빈도 제한이 있다. 한도를 넘는 명령은 오류 ack로 거부하고 스트림은 상대에게 전달하지 않는다. 한도 값은 정상 플레이 관찰로 정해 근거와 함께 AUTH에 적는다.
-- [ ] 위 경계와 상대 비공개 정보(보유 방해요소) 비노출을 단위·통합 테스트로 고정하고 기존 `npm test`·`npm run test:db`가 통과한다.
-- [ ] 세션 서명 비밀값 교체 절차(이전 값을 함께 받는 무중단 교체)를 OPERATIONS에 적는다.
+- [x] 응답에 CSP·`X-Content-Type-Options`·`Referrer-Policy`, 운영에서 HSTS가 붙는다. 로그인·로비·온라인 경기·로컬 2인·AI 대전 화면(Worker·SharedWorker·WebGL·오디오·글꼴·영상)이 CSP 위반 없이 동작한다.
+- [x] 허용하지 않은 출처(Origin)의 Socket.IO 연결이 거부되고, 같은 출처 연결은 그대로 된다.
+- [x] Socket.IO 메시지 크기 상한을 기본값(1MB)에서 실제 최대 메시지에 맞춰 줄이고, 넘는 메시지는 처리하지 않는다.
+- [x] 경기 명령(`shot:submit` 등)과 응답 없는 스트림(`aim:update`·`hazard:aim`)에 사용자별 빈도 제한이 있다. 한도를 넘는 명령은 오류 ack로 거부하고 스트림은 상대에게 전달하지 않는다. 한도 값은 정상 플레이 관찰로 정해 근거와 함께 AUTH에 적는다.
+- [x] 위 경계와 상대 비공개 정보(보유 방해요소) 비노출을 단위·통합 테스트로 고정하고 기존 `npm test`·`npm run test:db`가 통과한다.
+- [x] 세션 서명 비밀값 교체 절차(이전 값을 함께 받는 무중단 교체)를 OPERATIONS에 적는다.
 
-검증 근거: 작업일의 worklog
+검증 근거: [2026-11-27 worklog](worklogs/2026-11-27.md#sec-001-서버-보안-강화). 한도는 클라이언트 코드의 최대 빈도와 자동 연속 입력으로 정했고 사람 두 명의 실제 경기 빈도는 운영 로그(`rate_limited`)로 본다. HSTS의 HTTPS 브라우저 확인은 OPS-004
 
 ## OPS-002 0원 호스팅 재검토
 
@@ -238,6 +238,7 @@ Issue·PR: 미생성
 - [ ] Docker Compose로 Caddy·서버·PostgreSQL이 실행되고, 컨테이너 종료와 VM 재부팅 뒤 자동으로 다시 올라온다(실제로 재부팅해 확인).
 - [ ] 대기 상태와 온라인 경기 1판 중의 메모리·디스크 사용량, 한국에서의 왕복 지연을 측정해 worklog에 남긴다.
 - [ ] 두 계정으로 로그인 → 방 생성·입장 → 경기 종료 → 전적 반영까지 확인한다.
+- [ ] 운영 도메인 응답에 HSTS가 붙고, Cloudflare·Caddy를 거친 Socket.IO 연결이 출처 확인(`Host` 유지)을 통과하며 브라우저에 CSP 위반이 없다([SEC-001](#sec-001-서버-보안-강화)).
 - [ ] 기존 Neon 데이터 이전 여부를 사용자가 정하고, 이전 운영 서비스(Render·Neon·UptimeRobot 절전 방지 요청)를 정리한다. README 배포 접속 절을 새 주소로 고친다.
 
 검증 근거: 작업일의 worklog
@@ -327,7 +328,7 @@ Issue·PR: 미생성
 상태: 예정
 담당: 미정
 의존성: OPS-004, OPS-003
-범위: 포털 배포 1단계([DEC-097](DECISIONS.md#결정-색인), [PRD 배포 채널](PRD.md#16-배포-채널)). itch.io 페이지의 iframe(다른 도메인)에서 자체 도메인 서버로 로그인·온라인 대전을 할 수 있게 하고 클라이언트 빌드를 제출한다. 포털 iframe에서는 쿠키 세션이 전송되지 않는 브라우저가 있어 인증 방식을 바꿔야 한다. 인증 방식·게스트 범위는 미정이라 설계안을 만들어 사용자가 정한다.
+범위: 포털 배포 1단계([DEC-097](DECISIONS.md#결정-색인), [PRD 배포 채널](PRD.md#16-배포-채널)). itch.io 페이지의 iframe(다른 도메인)에서 자체 도메인 서버로 로그인·온라인 대전을 할 수 있게 하고 클라이언트 빌드를 제출한다. 포털 iframe에서는 쿠키 세션이 전송되지 않는 브라우저가 있어 인증 방식을 바꿔야 한다. 인증 방식·게스트 범위는 미정이라 설계안을 만들어 사용자가 정한다. 지금 서버는 `Host`와 다른 출처의 Socket.IO 핸드셰이크를 거부하고 CSP `frame-ancestors 'none'`을 보내므로([AUTH](design/AUTH.md#http-보안-헤더), SEC-001) 허용 출처 목록에 맞춰 함께 고친다.
 관련 문서: [AUTH](design/AUTH.md), [API](design/API.md), [DATABASE](design/DATABASE.md), [OPS-002 worklog의 포털 조사](worklogs/2026-11-26.md#ops-002-운영-인프라-재검토)
 Issue·PR: 미생성
 

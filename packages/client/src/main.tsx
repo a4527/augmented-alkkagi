@@ -1,3 +1,5 @@
+// 서버 CSP가 eval을 막으므로 스키마가 만들어지기 전에 Zod의 JIT 시험을 끈다. 첫 import로 둔다.
+import '@alkkagi/shared/no-jit';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/app.tsx';
 import { AiPage } from './ai/ai-page.tsx';

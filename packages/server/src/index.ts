@@ -29,6 +29,7 @@ const staticDir = path.resolve(here, '../../client/dist');
 const server = createAppServer({
   pool,
   sessionSecret: config.sessionSecret,
+  previousSessionSecret: config.previousSessionSecret,
   isProduction: config.isProduction,
   staticDir,
 });

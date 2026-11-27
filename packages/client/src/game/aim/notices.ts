@@ -19,6 +19,7 @@ const TEXT: Partial<Record<GameErrorCode, string>> = {
   INVALID_INPUT: '입력이 올바르지 않아요',
   OUT_OF_REACH: '손이 안 닿아요 — 판을 돌려 보세요',
   BOARD_ROTATE_NOT_ALLOWED: '지금은 판을 돌릴 수 없어요',
+  RATE_LIMITED: '입력이 너무 빨라요. 잠시 후 다시 해 보세요',
 };
 
 /** 지속 안내(조건이 이어지는 동안 표시) */

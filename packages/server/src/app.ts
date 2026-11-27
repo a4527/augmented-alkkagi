@@ -23,6 +23,8 @@ import { registerRoomHandlers } from './rooms/room-handlers.ts';
 import { RoomService, type RoomHooks } from './rooms/room-service.ts';
 import { createRoomsRouter } from './rooms/router.ts';
 import { createStaticHandlers, hasClientBuild } from './static.ts';
+import { securityHeaders } from './security/headers.ts';
+import { GameRateLimiter, type RateLimitedInfo } from './game/game-rate-limit.ts';
 
 const PgStoreType = connectPgSimple(session);
 
@@ -31,6 +33,8 @@ export const SESSION_COOKIE_NAME = 'connect.sid';
 export type AppOptions = {
   pool: pg.Pool;
   sessionSecret: string;
+  /** 교체 중인 이전 비밀값. 새 쿠키는 `sessionSecret`으로 서명하고 검증은 둘 다로 한다. */
+  previousSessionSecret?: string;
   /** 운영이면 세션 쿠키에 secure를 붙인다. */
   isProduction: boolean;
   /** 경기 서버 훅(IMPL-009)보다 먼저 불린다. 테스트가 시작·이탈을 관찰하거나 지연·실패시키는 자리다. */
@@ -45,7 +49,21 @@ export type AppOptions = {
   clock?: RuntimeClock;
   /** 경기가 끝나 전적을 저장한 뒤 불린다. 테스트가 종료를 관찰하는 자리다. */
   onGameFinished?: GameServiceOptions['onFinished'];
+  /** 경기 입력 빈도 제한을 넘긴 사용자를 알린다. 기본은 서버 로그 한 줄이다. */
+  onRateLimited?: (info: RateLimitedInfo) => void;
 };
+
+/** 빈도 제한 초과 로그(OPERATIONS 서버 로그 `rate_limited`). 사용자·묶음만 남긴다. */
+function logRateLimited(info: RateLimitedInfo): void {
+  console.log(
+    JSON.stringify({
+      ts: new Date().toISOString(),
+      event: 'rate_limited',
+      userId: info.userId,
+      result: info.group,
+    }),
+  );
+}
 
 export type AppServer = {
   app: Express;
@@ -70,6 +88,8 @@ export function createAppServer(options: AppOptions): AppServer {
   // Render 프록시 1단. secure 쿠키와 IP당 빈도 제한이 이에 의존한다(AUTH).
   app.set('trust proxy', 1);
   app.disable('x-powered-by');
+  // 보안 헤더는 헬스체크·정적 파일·API 모든 응답에 붙인다(AUTH HTTP 보안 헤더).
+  app.use(securityHeaders({ isProduction }));
   // 외부 헬스체크용이다. DB를 조회하지 않고 세션·본문 처리 앞에 둔다(OPERATIONS 헬스체크).
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok' });
@@ -87,7 +107,10 @@ export function createAppServer(options: AppOptions): AppServer {
   const sessionMiddleware: RequestHandler = session({
     name: SESSION_COOKIE_NAME,
     store,
-    secret: sessionSecret,
+    // 배열이면 첫 값으로 서명하고 모든 값으로 검증한다(무중단 비밀값 교체, OPERATIONS).
+    secret: options.previousSessionSecret
+      ? [sessionSecret, options.previousSessionSecret]
+      : sessionSecret,
     resave: false,
     saveUninitialized: false,
     // maxAge를 두지 않아 브라우저를 닫으면 만료된다(DEC-028).
@@ -136,9 +159,14 @@ export function createAppServer(options: AppOptions): AppServer {
       console.error('방 명령 처리 오류:', error instanceof Error ? error.message : error);
     },
   };
+  const gameLimiter = new GameRateLimiter(options.onRateLimited ?? logRateLimited);
   const { io } = createRealtime(httpServer, sessionMiddleware, registry, (socket, userId) => {
     registerRoomHandlers(socket, userId, roomDeps);
-    registerGameHandlers(socket, userId, { game: gameService, onError: onGameError });
+    registerGameHandlers(socket, userId, {
+      game: gameService,
+      limiter: gameLimiter,
+      onError: onGameError,
+    });
   });
 
   // 정적 파일은 세션 조회(Neon) 앞에 둔다. 자산 요청마다 DB를 쓰지 않고 DB가 느려도 화면 자산은 나간다.

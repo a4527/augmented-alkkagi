@@ -25,6 +25,8 @@ export const ERROR_CODES = [
   'REMATCH_NOT_AVAILABLE',
   'OUT_OF_REACH',
   'BOARD_ROTATE_NOT_ALLOWED',
+  /** 사용자별 경기 입력 빈도 제한을 넘었다(서버 어댑터만 낸다) */
+  'RATE_LIMITED',
   /** 서버 어댑터가 명령을 처리하다 예외가 났다. 클라이언트는 일반 오류 안내로 처리한다 */
   'INTERNAL_ERROR',
 ] as const;
