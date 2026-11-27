@@ -1,0 +1,10 @@
+# DB 백업(OPS-005). %i는 full 또는 diff. 실패하면 backup.sh가 Discord로 알린다.
+[Unit]
+Description=alkkagi DB backup (%i)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=deploy
+ExecStart=/opt/alkkagi/app/deploy/backup.sh %i
