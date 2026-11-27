@@ -232,16 +232,16 @@ Issue·PR: 미생성
 
 수용 기준:
 
-- [ ] 주문 전에 HostHatch 서울(차선 도쿄)의 월 가격·결제 주기·부가세·공유 CPU 약관을 확인하고 worklog와 OPERATIONS 비용 표에 남긴다. 월 결제 불가, 부가세·도메인 포함 월 1만 원 초과, 상시 CPU 사용 제한 중 하나라도 해당하면 대체안([ADR-0005](adr/0005-hosting-and-data.md#선택과-핵심-조건))으로 바꾸고 사용자에게 알린다.
+- [x] 주문 전에 HostHatch 서울(차선 도쿄)의 월 가격·결제 주기·부가세·공유 CPU 약관을 확인하고 worklog와 OPERATIONS 비용 표에 남긴다. 월 결제 불가, 부가세·도메인 포함 월 1만 원 초과, 상시 CPU 사용 제한 중 하나라도 해당하면 대체안([ADR-0005](adr/0005-hosting-and-data.md#선택과-핵심-조건))으로 바꾸고 사용자에게 알린다.
 - [x] 자체 도메인이 Cloudflare 프록시를 거쳐 HTTPS·WSS로 서버에 닿는다. Cloudflare와 서버 사이도 검증된 TLS다.
 - [x] VM은 SSH 키 로그인만 허용하고, 방화벽으로 필요한 포트만 연다. 자동 보안 업데이트와 스왑을 켠다.
 - [x] Docker Compose로 Caddy·서버·PostgreSQL이 실행되고, 컨테이너 종료와 VM 재부팅 뒤 자동으로 다시 올라온다(실제로 재부팅해 확인).
 - [x] 대기 상태와 온라인 경기 1판 중의 메모리·디스크 사용량, 한국에서의 왕복 지연을 측정해 worklog에 남긴다.
 - [x] 두 계정으로 로그인 → 방 생성·입장 → 경기 종료 → 전적 반영까지 확인한다.
 - [ ] 운영 도메인 응답에 HSTS가 붙고, Cloudflare·Caddy를 거친 Socket.IO 연결이 출처 확인(`Host` 유지)을 통과하며 브라우저에 CSP 위반이 없다([SEC-001](#sec-001-서버-보안-강화)).
-- [ ] 기존 Neon 데이터 이전 여부를 사용자가 정하고, 이전 운영 서비스(Render·Neon·UptimeRobot 절전 방지 요청)를 정리한다. README 배포 접속 절을 새 주소로 고친다.
+- [x] 기존 Neon 데이터 이전 여부를 사용자가 정하고, 이전 운영 서비스(Render·Neon·UptimeRobot 절전 방지 요청)를 정리한다. README 배포 접속 절을 새 주소로 고친다.
 
-진행: 2026-11-27 https://playalkkagi.com 개통([worklog](worklogs/2026-11-27.md#ops-004-운영-서버-구축)). 남은 것: 결제 주기·CPU 약관 확인, 이전 서비스 정리, Cloudflare가 넣는 분석 스크립트의 CSP 위반 처리.
+진행: 2026-11-27 https://playalkkagi.com 개통([worklog](worklogs/2026-11-27.md#ops-004-운영-서버-구축)). 결제 주기·CPU 약관은 사용자 확인, 이전 서비스는 사용자 계정이 아니라 정리 대상 없음. 남은 것: Cloudflare가 넣는 분석 스크립트의 CSP 위반 처리.
 
 검증 근거: 작업일의 worklog
 
