@@ -11,12 +11,20 @@ x-logging: &logging # 디스크 10GB 예산: 컨테이너마다 로그 10MB × 3
 
 services:
   postgres:
-    image: postgres:17-bookworm
+    # pgBackRest를 넣은 이미지(OPS-005). WAL 보관 설정은 backup-setup.sh가 ALTER SYSTEM으로 켠다.
+    build: ./postgres
+    image: alkkagi-postgres:local
     restart: unless-stopped
     environment:
       POSTGRES_USER: alkkagi
       POSTGRES_DB: alkkagi
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD가 필요하다}
+      # R2 백업 저장소(OPERATIONS 백업·복구). 비어 있으면 백업 설정 전이다.
+      PGBACKREST_REPO1_S3_ENDPOINT: ${R2_ENDPOINT:-}
+      PGBACKREST_REPO1_S3_BUCKET: ${R2_BUCKET:-}
+      PGBACKREST_REPO1_S3_KEY: ${R2_ACCESS_KEY_ID:-}
+      PGBACKREST_REPO1_S3_KEY_SECRET: ${R2_SECRET_ACCESS_KEY:-}
+      PGBACKREST_REPO1_CIPHER_PASS: ${BACKUP_CIPHER_PASS:-}
     # 서버 연결 풀은 5개(db/pool.ts)다. 2GB VM에 맞춰 연결 수를 줄인다.
     command: ['postgres', '-c', 'max_connections=20', '-c', 'shared_buffers=128MB']
     volumes:

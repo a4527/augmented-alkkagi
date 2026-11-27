@@ -1,0 +1,10 @@
+# 10분마다 WAL 보관 상태 확인
+[Unit]
+Description=alkkagi WAL archive check every 10 minutes
+
+[Timer]
+OnCalendar=*:0/10
+Persistent=true
+
+[Install]
+WantedBy=timers.target

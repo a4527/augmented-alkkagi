@@ -31,7 +31,7 @@
 | [SEC-001](#sec-001-서버-보안-강화) | 서버 보안 강화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/a4527/augmented-alkkagi/pull/14) |
 | [OPS-002](#ops-002-0원-호스팅-재검토) | 0원 호스팅 재검토 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #13](https://github.com/a4527/augmented-alkkagi/pull/13) |
 | [OPS-004](#ops-004-운영-서버-구축) | 운영 서버 구축 | P1 | OPS-002 | 완료 | Claude — 사용자 요청 수행 | [PR #15](https://github.com/a4527/augmented-alkkagi/pull/15) |
-| [OPS-005](#ops-005-db-백업복구) | DB 백업·복구 | P1 | OPS-004 | 예정 | 미정 | 미생성 |
+| [OPS-005](#ops-005-db-백업복구) | DB 백업·복구 | P1 | OPS-004 | 완료 | Claude — 사용자 요청 수행 | [PR #16](https://github.com/a4527/augmented-alkkagi/pull/16) |
 | [OPS-003](#ops-003-배포-자동화) | 배포 자동화 | P1 | CI-001, OPS-004 | 예정 | 미정 | 미생성 |
 | [OBS-001](#obs-001-모니터링알림) | 모니터링·알림 | P1 | OPS-004 | 예정 | 미정 | 미생성 |
 | [VAL-003](#val-003-부하e2e-검증) | 부하·E2E 검증 | P2 | CI-001, OPS-004 | 예정 | 미정 | 미생성 |
@@ -247,21 +247,21 @@ Issue·PR: [PR #15](https://github.com/a4527/augmented-alkkagi/pull/15)
 ## OPS-005 DB 백업·복구
 
 우선순위: P1
-상태: 예정
-담당: 미정
+상태: 완료
+담당: Claude — 사용자 요청 수행
 의존성: OPS-004
 범위: 가입 계정·전적을 잃지 않는다는 기준([DEC-096](DECISIONS.md#결정-색인))에 따라 VM PostgreSQL의 연속 백업과 복구 절차를 만든다([OPERATIONS 백업·복구](design/OPERATIONS.md#백업복구)). 저장소는 Cloudflare R2 무료 범위다.
 관련 문서: [OPERATIONS 백업·복구](design/OPERATIONS.md#백업복구), [ADR-0005](adr/0005-hosting-and-data.md)
-Issue·PR: 미생성
+Issue·PR: [PR #16](https://github.com/a4527/augmented-alkkagi/pull/16)
 
 수용 기준:
 
-- [ ] WAL이 1분 안팎 간격으로 R2에 보관되고 주기 전체 백업이 쌓인다. 도구·보관 개수·R2 사용량을 OPERATIONS에 적는다.
-- [ ] 보관이나 백업이 실패하면 알림을 받는다(일부러 실패시켜 확인).
-- [ ] 임시 컨테이너에 특정 시점으로 복구해 회원·전적 수가 원본과 같은지 확인하고, 복구 소요 시간과 실제 손실 범위를 기록한다. 복구 시간은 24시간 기준 안이어야 한다.
-- [ ] 월 1회 복구 연습 절차를 OPERATIONS에 적는다.
+- [x] WAL이 1분 안팎 간격으로 R2에 보관되고 주기 전체 백업이 쌓인다. 도구·보관 개수·R2 사용량을 OPERATIONS에 적는다.
+- [x] 보관이나 백업이 실패하면 알림을 받는다(일부러 실패시켜 확인).
+- [x] 임시 컨테이너에 특정 시점으로 복구해 회원·전적 수가 원본과 같은지 확인하고, 복구 소요 시간과 실제 손실 범위를 기록한다. 복구 시간은 24시간 기준 안이어야 한다.
+- [x] 월 1회 복구 연습 절차를 OPERATIONS에 적는다.
 
-검증 근거: 작업일의 worklog
+검증 근거: [2026-11-27 worklog](worklogs/2026-11-27.md#ops-005-db-백업복구)
 
 ## OBS-001 모니터링·알림
 

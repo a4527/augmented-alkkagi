@@ -1,0 +1,11 @@
+# 매주 일요일 04:00(서울) 전체 백업
+[Unit]
+Description=alkkagi weekly full DB backup
+
+[Timer]
+OnCalendar=Sun *-*-* 04:00:00 Asia/Seoul
+Persistent=true
+Unit=alkkagi-backup@full.service
+
+[Install]
+WantedBy=timers.target
