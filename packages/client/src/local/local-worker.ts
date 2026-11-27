@@ -1,6 +1,8 @@
 // SharedWorker 진입점. 같은 출처의 `/local` 창들이 이 워커 하나를 공유해 경기를 진행한다.
 // 시계는 epoch 기준 단조 시각이다(RuntimeClock 계약).
 /// <reference lib="webworker" />
+// 워커 스크립트 응답에도 CSP가 붙으므로 창과 같이 첫 import로 Zod JIT 시험을 끈다.
+import '@alkkagi/shared/no-jit';
 import { LocalAuthority, type PortLike } from './local-authority.ts';
 
 const scope = self as unknown as SharedWorkerGlobalScope;

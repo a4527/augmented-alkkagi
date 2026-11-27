@@ -5,7 +5,7 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | 세션 쿠키 인증(express-session + connect-pg-simple), argon2id(@node-rs/argon2), Zod 입력 검증 ([DEC-013](../DECISIONS.md#결정-색인)). IP당 인증 요청 제한([DEC-025](../DECISIONS.md#결정-색인)). 세션 만료·비밀번호 변경 시 다른 세션 종료([DEC-028](../DECISIONS.md#결정-색인)) |
-| 현재 구현 | 가입·로그인·로그아웃·`GET /api/me`·비밀번호 변경·캐릭터 변경 API, 세션, IP당 빈도 제한, argon2id, Socket.IO 연결 인증·중복 접속 대체(`packages/server/src/auth`·`realtime`, [IMPL-007](../legacy/TASKS-team.md#impl-007-인증)). 기권 명령 변환은 IMPL-009 |
+| 현재 구현 | 가입·로그인·로그아웃·`GET /api/me`·비밀번호 변경·캐릭터 변경 API, 세션, IP당 빈도 제한, argon2id, Socket.IO 연결 인증·중복 접속 대체(`packages/server/src/auth`·`realtime`, [IMPL-007](../legacy/TASKS-team.md#impl-007-인증)). 기권 명령 변환은 IMPL-009. HTTP 보안 헤더, Socket.IO 출처 확인·메시지 크기 상한, 경기 입력 사용자별 빈도 제한, 세션 비밀값 교체([SEC-001](../TASKS.md#sec-001-서버-보안-강화), `packages/server/src/security`·`realtime`·`game/game-rate-limit.ts`) |
 | 확정 (AUTH-001 완료) | 아래 [AUTH-001](../legacy/TASKS-team.md#auth-001-인증-상세-설계-확정) 세부 설정, 인증 요청 빈도 제한의 한도·응답 형식, 검증 경계 |
 | 미정 | 없음. 해시 시간은 구현 때 측정해 파라미터를 조정한다 |
 
@@ -31,7 +31,7 @@
 
 - **argon2id 파라미터**: `@node-rs/argon2` 기본값 대신 OWASP 최소 권장(메모리 19 MiB, 반복 2, 병렬 1)으로 시작하고 Render 무료 인스턴스의 해시 시간(목표 약 100~300ms)을 측정해 조정한다. 구현 때 이 PC(i5-1335U)에서는 해시 1회가 약 11ms였다. Render 무료 인스턴스에서 서버 안 로그로 11회 잰 결과 중앙값 약 311ms·평균 약 361ms(130~716ms)로 목표 상단에 걸쳐 **파라미터를 올리지 않고 그대로 둔다**([IMPL-013](../legacy/TASKS-team.md#impl-013-배포), [worklog](../worklogs/2026-11-05.md#impl-013-argon2id-해시-시간-서버-내-로그)). 더 내리면 OWASP 최소 권장 아래가 된다. 인스턴스 사양이 바뀌면 `argon2_timing` 로그로 다시 확인한다.
 - **프록시 신뢰**: `app.set('trust proxy', 1)`(Render 프록시 1단). 새 구성에서는 Cloudflare → Caddy 두 단계라 [OPS-003](../TASKS.md#ops-003-배포-자동화)에서 바꾼다([DEC-098](../DECISIONS.md#결정-색인)). `secure` 쿠키와 IP 제한이 이에 의존한다. 운영 설정에서 `X-Forwarded-Proto: https`가 있을 때 세션 쿠키에 `Secure`가 붙는 것을 테스트로 확인했다.
-- **환경 변수**: `SESSION_SECRET`은 32자 이상이어야 서버가 시작한다. 값은 문서·로그에 남기지 않는다([OPERATIONS](OPERATIONS.md)).
+- **환경 변수**: `SESSION_SECRET`은 32자 이상이어야 서버가 시작한다. 교체 중에만 이전 값을 `SESSION_SECRET_PREVIOUS`(32자 이상, 현재 값과 달라야 함)로 함께 둔다. 새 쿠키는 현재 값으로 서명하고 검증은 두 값으로 한다. 절차는 [OPERATIONS 세션 비밀값 교체](OPERATIONS.md#세션-비밀값-교체)다. 값은 문서·로그에 남기지 않는다([OPERATIONS](OPERATIONS.md)).
 
 ### Socket.IO 인증·중복 접속
 
@@ -39,6 +39,17 @@
 - **단일 인스턴스 전제**: 연결 등록부(사용자당 연결 하나)와 빈도 제한 카운터는 프로세스 메모리에 있다. 서버 인스턴스가 둘 이상이면 중복 접속 대체와 비밀번호 변경 시 연결 종료가 동작하지 않는다.
 - 같은 계정의 새 연결이 생기면 기존 연결에 `session:replaced`를 보내고 끊는다. 기존 연결이 게임 중이었다면 별도 경로가 아니라 **방 큐의 기권 명령**으로 처리한다([GAME](GAME.md#명령-경합과-시간), [PRD](../PRD.md#연결-끊김과-중복-접속)). 비밀번호 변경으로 끊긴 연결도 같다. 접속 대체도 일반 이탈과 같은 규칙을 따른다. 시작 커밋 전이면 대기실 처리이고 결과 화면의 재도전 15초 구간은 기권이 아니다([GAME](GAME.md#명령-경합과-시간)).
 - 재접속 복구는 없다. 끊기면 기권패이고 클라이언트는 로그인 화면으로 간다.
+- **출처 확인**: 핸드셰이크 요청에 `Origin`이 있으면 그 호스트가 요청의 `Host`와 같을 때만 받는다(`realtime/origin.ts`). 다른 사이트의 페이지가 사용자의 쿠키로 소켓을 여는 것을 막는다. 브라우저는 WebSocket과 다른 출처 요청에 항상 `Origin`을 붙이므로, `Origin`이 없는 요청(같은 출처 폴링 GET·브라우저가 아닌 클라이언트)은 세션 인증만 거친다. 거부는 세션 조회 전 HTTP 403이다. Caddy·Cloudflare·Vite 개발 서버는 `Host`를 바꾸지 않는다. 포털(itch.io 등) 출처 허용은 [POR-001](../TASKS.md#por-001-itchio-배포)에서 정한다.
+- **메시지 크기 상한**: 클라이언트 → 서버 메시지 한 개를 4 KiB로 제한한다(Socket.IO `maxHttpBufferSize`, 기본 1 MB). 가장 큰 정상 메시지는 모든 필드를 채운 `aim:update`로 359바이트이며 `realtime/socket.test.ts`가 스키마를 통과하는 최대 입력이 상한의 1/4 아래임을 고정한다. 넘는 메시지는 처리하지 않고 연결을 끊는다(경기 중이면 이탈과 같이 기권패). 폴링 전송도 클라이언트가 핸드셰이크의 상한에 맞춰 묶음을 나눠 보낸다.
+
+### HTTP 보안 헤더
+
+모든 응답(화면·정적 자산·API·헬스체크)에 붙인다(`security/headers.ts`).
+
+- **CSP**: `default-src`·`script-src`·`style-src`·`img-src`·`font-src`·`media-src`·`connect-src`·`worker-src`를 모두 `'self'`로 둔다. 클라이언트의 스크립트·스타일·글꼴·이미지·소리·영상·Worker·SharedWorker·API·Socket.IO가 모두 같은 출처이고 외부 CDN을 쓰지 않기 때문이다. `connect-src 'self'`는 같은 호스트의 `ws:`·`wss:`도 허용한다(CSP Level 3). `object-src 'none'`, `base-uri 'none'`, `form-action 'self'`, `frame-ancestors 'none'`(다른 사이트의 iframe 금지, 포털 허용은 POR-001). 인라인 스크립트·스타일·`eval`은 허용하지 않는다. React의 `style` 속성은 CSSOM으로 적용돼 막히지 않는다.
+- **Zod JIT**: Zod 4는 객체 스키마를 만들 때 `Function('')`으로 JIT 가능 여부를 시험해 CSP 위반 보고를 남긴다(검증은 일반 경로로 정상 동작). 브라우저 진입점(`main.tsx`·`ai-worker.ts`·`local-worker.ts`)이 첫 import로 `@alkkagi/shared/no-jit`을 불러 스키마가 만들어지기 전에 JIT를 끈다. 서버는 CSP 대상이 아니라 끄지 않는다.
+- **그 밖**: `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`. 운영(`NODE_ENV=production`)에서만 `Strict-Transport-Security: max-age=31536000`을 붙인다. `includeSubDomains`·`preload`는 도메인을 정할 때([OPS-004](../TASKS.md#ops-004-운영-서버-구축)) 판단한다.
+- 화면별 확인 결과는 [worklog](../worklogs/2026-11-27.md#sec-001-서버-보안-강화)에 있다.
 
 ### 오류 형식
 
@@ -71,5 +82,20 @@ REST와 Socket.IO ack의 오류 형식·코드 목록은 [API](API.md#오류-형
 - 학교·공용 NAT처럼 같은 IP를 여러 명이 쓰면 가입·로그인이 몰릴 수 있다. 플레이 테스트에서 걸리면 한도를 올린다.
 - 클라이언트 IP를 얻으려면 위 프록시 신뢰 설정이 필요하다.
 - `room:join`에도 사용자당 빈도 제한을 둔다([API](API.md#방-이벤트-필드)). 한도는 사용자당 분당 30회이며 초과하면 ack `RATE_LIMITED`를 돌려준다. 카운터는 `userId`를 키로 한 메모리 맵에 두어 재접속해도 초기화되지 않게 한다(6자리 코드 대입 방어). 서버가 재시작하면 사라진다.
+
+## 경기 입력 빈도 제한
+
+경기 Socket.IO 입력에 사용자별 1초 고정 창 한도를 둔다(`game/game-rate-limit.ts`, [SEC-001](../TASKS.md#sec-001-서버-보안-강화)). 카운터는 `room:join`과 같이 `userId`를 키로 한 메모리 맵이라 재접속해도 이어지고 서버가 재시작하면 사라진다.
+
+| 묶음 | 이벤트 | 한도(초당) | 초과 시 |
+| --- | --- | --- | --- |
+| 경기 명령 | `shot:submit`·`hazard:use`·`game:forfeit`·`emote:send`·`rematch:request` (함께 센다) | 10 | ack `RATE_LIMITED`. 입력 검증·방 큐에 넣지 않는다 |
+| 판 돌리기 | `board:rotate` | 30 | ack `RATE_LIMITED`(클라이언트는 조용히 무시하고 다음 스냅샷을 따른다) |
+| 조준 | `aim:update` | 30 | 상대에게 중계하지 않는다 |
+| 방해요소 조준 | `hazard:aim` | 30 | 처리하지 않는다 |
+
+- **한도 근거**: 클라이언트 코드에서 정상 입력의 최대 빈도를 확인했다. 조준·판 돌리기·방해요소 조준은 각각 50ms 간격(`STREAM_INTERVAL_MS`, 최대 20Hz)으로 보내고, 경기 명령은 키 반복(`e.repeat`)을 거른 사람의 클릭·키 입력이라 초당 몇 번을 넘지 않는다. 한도는 그 최대치에 1.5배 이상 여유를 둔 값이다. 실제 두 사람 온라인 경기에서의 빈도는 아직 재지 않았다. 운영에서 정상 사용자가 걸리는지는 아래 로그로 보고 한도를 고친다.
+- **기록**: 사용자·묶음마다 한도를 넘긴 첫 호출에서만 서버 로그 `rate_limited`를 한 줄 남긴다([OPERATIONS 서버 로그](OPERATIONS.md#서버-로그)).
+- 로컬 2인·AI 대전은 브라우저 안에서 돌아 서버 한도가 없다.
 
 계정 삭제와 건의 기능은 MVP에서 제공하지 않으므로 해당 인가 경계는 두지 않는다. 비밀번호 길이는 제품 규칙(8~64자)을 따른다. 닉네임 중복 검사는 NFC 정규화·영문 대소문자 무시 기준([회원등록](../PRD.md#회원등록))으로 하며 DB의 `lower(nickname)` 유니크 인덱스가 강제한다([DATABASE](DATABASE.md)).

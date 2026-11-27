@@ -374,6 +374,29 @@ describe.skipIf(!baseUrl)('온라인 대전 서버 (IMPL-009)', () => {
       expect(rematch).toMatchObject({ ok: false, error: { code: 'REMATCH_NOT_AVAILABLE' } });
     });
 
+    it('경기 입력이 사용자별 한도를 넘으면 명령은 RATE_LIMITED이고 조준은 한도까지만 상대에게 간다', async () => {
+      const { host, guest, gameId, hostStart } = await startMatch();
+      const relayedBefore = eventsOf(guest, 'aim:state').length;
+      for (let i = 0; i < 40; i++) host.socket.emit('aim:update', { gameId, mode: 'idle' });
+      // 낡은 turnId의 발사 11회: 10회는 규칙 검증(STALE_TURN)까지 가고 11번째는 그 전에 거부된다.
+      const shot = { gameId, turnId: 99_999, stoneId: 0, angle: 0, power: 50 };
+      const acks = await Promise.all(
+        Array.from({ length: 11 }, () => command(host, 'shot:submit', shot)),
+      );
+      const codes = acks.map((a) => (a.ok ? 'ok' : a.error.code));
+      expect(codes.filter((c) => c === 'STALE_TURN')).toHaveLength(10);
+      expect(codes.filter((c) => c === 'RATE_LIMITED')).toHaveLength(1);
+      await sleep(200);
+      // aim:state는 volatile이라 일부가 빠질 수 있어 상한만 본다.
+      const relayed = eventsOf(guest, 'aim:state').length - relayedBefore;
+      expect(relayed).toBeGreaterThan(0);
+      expect(relayed).toBeLessThanOrEqual(30);
+      // 중계된 조준 상태를 포함해 상대가 받은 어떤 이벤트에도 내 보유 방해요소가 없다.
+      expect(JSON.stringify(guest.events)).not.toContain(
+        hostStart.view.private.held!.hazardInstanceId,
+      );
+    });
+
     it('낡은 명령은 STALE_TURN·STALE_HAZARD이고 입력의 사용자·좌석은 쓰지 않는다', async () => {
       const { host, guest, gameId, hostStart, guestStart } = await startMatch();
       const turn = await waitFor<TurnChange>(host, 'turn:change');

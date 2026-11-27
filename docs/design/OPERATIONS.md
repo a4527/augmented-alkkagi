@@ -89,6 +89,7 @@
 - `leave`는 연결 끊김·나가기·접속 대체로 이탈이 큐에서 관찰된 시점이며 `reason`에 `disconnect`·`leave_button`·`session_replaced`를 적는다. 접속 대체도 별도 이벤트 없이 `leave` 하나로 기록한다.
 - `forfeit`는 기권패가 확정된 시점이며 `reason`은 `leave`(위 `leave`로 확정)·`command`(`game:forfeit` 명령)·`timeout`(연속 시간초과 누적) 중 하나다. `game_over`의 `reason`에 나오는 `timeout_forfeit`는 `game_over`에만 쓰며 `forfeit` 이벤트에는 `timeout`으로 적는다. `game_over`는 `finishOnce` 실행 결과(`reason`: [API `game:over`](API.md#경기-이벤트-필드)의 `all_stones_out`·`final_round`·`forfeit`·`timeout_forfeit`)다.
 - `tick_skipped`는 [틱 따라잡기 상한](GAME.md#전송실행)을 넘어 버린 지연 시간을 `result`에 적는다.
+- 경기 로그와 별도로 `rate_limited` 줄(`ts`·`event`·`userId`·`result`=묶음 이름 `command`·`board:rotate`·`aim:update`·`hazard:aim`)을 남긴다. 사용자·묶음마다 1초 창에서 한도를 넘긴 첫 호출에만 남기며 입력 내용은 싣지 않는다([AUTH 경기 입력 빈도 제한](AUTH.md#경기-입력-빈도-제한)).
 - 이 로그가 동시 이탈과 시작 직전 이탈의 판정 근거다([게임 규칙](../PRD.md#게임-규칙)). 경기 종료 사유는 DB에 저장하지 않고 여기에만 남는다([DATABASE](DATABASE.md#경기-종료-저장)).
 
 `ingressSeq`는 **방 단위 큐**([GAME 구현 경계](GAME.md#구현-경계-ab)의 방별 단일 큐)가 붙이는 순번이며 서버가 켜져 있는 동안 방 안에서 계속 늘어난다. 재도전으로 새 경기가 시작돼도 0으로 되돌리지 않는다. 대기실 이벤트(시작 전 `leave`)는 경기가 없어 `gameId`가 `null`이고 `roomId`로 묶으며, `start_commit`에서 새 `gameId`가 붙어 그 뒤 이벤트는 `gameId`를 가진다. 재도전 경기는 새 `gameId`를 받지만 같은 방의 `ingressSeq`가 이어진다. 그래서 판정은 `roomId`와 `ingressSeq`로 한다.
@@ -125,6 +126,18 @@
 - **전체 백업**: 주기적으로 전체 백업을 R2에 둔다. 보관 개수는 R2 무료 10 GB 안에서 정한다.
 - **복구 연습**: 월 1회 임시 컨테이너에 복구해 회원·전적 수를 원본과 비교하고 worklog에 남긴다. 보관이 실패하면 알림을 받는다.
 - **한계**: VM이 통째로 사라지면 마지막 보관 이후의 변경(약 1분)을 잃는다. 대체안(Supabase)으로 가면 1시간 덤프라 최대 1시간을 잃는다.
+
+### 세션 비밀값 교체
+
+`SESSION_SECRET`이 새었거나 주기적으로 바꿀 때 로그인한 사용자를 끊지 않고 교체한다([SEC-001](../TASKS.md#sec-001-서버-보안-강화)). 서버는 `SESSION_SECRET_PREVIOUS`가 있으면 새 쿠키는 `SESSION_SECRET`으로 서명하고 검증은 두 값으로 한다([AUTH 해시·프록시](AUTH.md#해시프록시)).
+
+1. 새 값을 만든다(32자 이상, 예: `openssl rand -base64 48`). 값은 서버의 비밀값 저장 위치에만 넣고 문서·로그·채팅에 남기지 않는다.
+2. 지금 값을 `SESSION_SECRET_PREVIOUS`로 옮기고 `SESSION_SECRET`에 새 값을 넣은 뒤 서버를 재시작한다. 재시작으로 진행 중 소켓·경기는 끊기지만(재접속 복구 없음) 로그인 세션은 그대로다. 경기가 없는 시간에 한다.
+3. 로그인·`GET /api/me`가 되는지 확인한다.
+4. 서버 쪽 세션 만료(마지막 사용 후 24시간)가 지난 뒤 `SESSION_SECRET_PREVIOUS`를 지우고 다시 재시작한다. 그때까지 브라우저를 계속 열어 둔 사용자만 다시 로그인한다.
+
+- **유출 대응**: 이전 값이 새었으면 2단계에서 `SESSION_SECRET_PREVIOUS`를 두지 않는다. 모든 사용자가 다시 로그인한다. 필요하면 `session` 테이블을 비워 서버 쪽 세션도 끝낸다.
+- 교체 날짜와 이유만 worklog에 남기고 값은 적지 않는다.
 
 ### 의존성·취약점 관리
 

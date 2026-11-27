@@ -392,5 +392,38 @@ describe.skipIf(!baseUrl)('인증 API·세션·Socket.IO 인증', () => {
         await prod.close();
       }
     });
+
+    it('세션 비밀값을 교체하는 동안 이전 값으로 서명된 세션도 유지되고, 이전 값을 빼면 끝난다', async () => {
+      // beforeAll의 서버가 쓰는 값이 교체 전 비밀값이다.
+      const oldSecret = 'test-secret-test-secret-test-secret-0123';
+      const newSecret = 'rotated-secret-rotated-secret-rotated-0';
+      const { cookie } = await signupAndLogin('비밀값교체');
+      const rotating = createAppServer({
+        pool: tempDb.pool,
+        sessionSecret: newSecret,
+        previousSessionSecret: oldSecret,
+        isProduction: false,
+      });
+      const rotated = createAppServer({
+        pool: tempDb.pool,
+        sessionSecret: newSecret,
+        isProduction: false,
+      });
+      try {
+        await request(rotating.httpServer).get('/api/me').set('Cookie', cookie).expect(200);
+        // 교체 중에 새로 로그인하면 새 비밀값으로 서명되어 이전 값을 뺀 뒤에도 유지된다.
+        const ip = nextIp();
+        const res = await request(rotating.httpServer)
+          .post('/api/auth/login')
+          .set('X-Forwarded-For', ip)
+          .send({ nickname: '비밀값교체', password: PASSWORD })
+          .expect(200);
+        await request(rotated.httpServer).get('/api/me').set('Cookie', cookieOf(res)).expect(200);
+        await request(rotated.httpServer).get('/api/me').set('Cookie', cookie).expect(401);
+      } finally {
+        await rotating.close();
+        await rotated.close();
+      }
+    });
   });
 });
