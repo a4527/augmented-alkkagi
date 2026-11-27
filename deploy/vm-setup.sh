@@ -17,6 +17,8 @@ if [ ! -s /root/.ssh/authorized_keys ]; then
 fi
 
 export DEBIAN_FRONTEND=noninteractive
+# 첫 부팅 직후에는 자동 보안 업데이트가 dpkg 잠금을 잡고 있다. 풀릴 때까지 최대 10분 기다린다.
+apt-get() { command apt-get -o DPkg::Lock::Timeout=600 "$@"; }
 apt-get update
 apt-get -y upgrade
 apt-get -y install ca-certificates curl git ufw unattended-upgrades
