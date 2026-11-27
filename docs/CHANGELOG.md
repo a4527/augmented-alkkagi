@@ -7,6 +7,7 @@
 ## 2026-11-27
 
 - 새 운영 주소 https://playalkkagi.com 을 열었다. 서울 서버와 Cloudflare를 쓴다. 이전 주소(Render)의 계정·전적은 옮기지 않아 새로 가입해야 한다([OPS-004](TASKS.md#ops-004-운영-서버-구축)).
+- 운영 DB(계정·전적)를 Cloudflare R2에 암호화해 1분 단위로 백업한다. 서버가 사라져도 최대 약 1분의 변경만 잃는다([OPS-005](TASKS.md#ops-005-db-백업복구)).
 
 ## 미출시
 

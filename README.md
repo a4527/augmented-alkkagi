@@ -141,6 +141,14 @@ HostHatch 서울 VM 한 대에 서버·DB를 두고 Cloudflare로 연결한다([
 
    두 검사가 오류 없이 끝나야 실행한다. 서버를 다시 빌드·실행할 때는 `git pull` 뒤 `$COMPOSE up -d --build`를 쓴다(자동 배포는 [OPS-003](docs/TASKS.md#ops-003-배포-자동화)).
 
+8. **DB 백업 켜기**([OPERATIONS 백업·복구](docs/design/OPERATIONS.md#백업복구)): Cloudflare R2에 버킷을 만들고 그 버킷만 읽기·쓰기 가능한 API 토큰을 발급한다. Discord 채널 웹후크를 만든다. `/opt/alkkagi/.env`의 `R2_*`·`DISCORD_WEBHOOK_URL`을 채우고 `BACKUP_CIPHER_PASS`(`openssl rand -base64 48`)를 넣은 뒤 그 값을 VM 밖에도 보관한다. 그다음 실행한다:
+
+   ```bash
+   cd /opt/alkkagi/app && bash deploy/backup-setup.sh
+   ```
+
+   Discord에 "DB 백업을 켰다" 알림이 오면 된다. 복구 연습은 `bash deploy/restore-drill.sh`다.
+
 ## 출처
 
 이 프로젝트는 2026-10-27 두 개발자가 [팀 저장소](https://github.com/moguab2808-commits/mini-project-1-1)에서 함께 시작한 미니프로젝트이며, 2026-11-25부터 이 저장소에서 개인 프로젝트로 이어 간다([DEC-091](docs/DECISIONS.md#결정-색인)). 전환 전의 기획·설계·구현은 두 사람의 공동 작업이고, 기여 내역은 Git 이력과 팀 저장소의 Issue·PR에 남아 있다. 문서의 "개발자 A·B"는 당시 담당 구분이다. 협업 규칙은 [CONTRIBUTING](docs/CONTRIBUTING.md)을 따른다.

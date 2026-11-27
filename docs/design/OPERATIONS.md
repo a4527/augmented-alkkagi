@@ -141,12 +141,33 @@
 
 ### 백업·복구
 
-가입 계정·전적을 잃지 않는다는 기준([DEC-096](../DECISIONS.md#결정-색인))에 따라 VM의 PostgreSQL을 외부에 백업한다([DEC-098](../DECISIONS.md#결정-색인)). 구현은 [OPS-005](../TASKS.md#ops-005-db-백업복구)다.
+가입 계정·전적을 잃지 않는다는 기준([DEC-096](../DECISIONS.md#결정-색인))에 따라 VM의 PostgreSQL을 Cloudflare R2에 백업한다([DEC-098](../DECISIONS.md#결정-색인), [OPS-005](../TASKS.md#ops-005-db-백업복구), 2026-11-27 가동).
 
-- **연속 보관**: WAL을 1분 안팎(`archive_timeout` 등)으로 Cloudflare R2에 보관해 시점 복구가 가능하게 한다. 도구는 pgBackRest를 우선한다(S3 호환 저장소 지원). R2와의 호환은 구축 때 확인한다.
-- **전체 백업**: 주기적으로 전체 백업을 R2에 둔다. 보관 개수는 R2 무료 10 GB 안에서 정한다.
-- **복구 연습**: 월 1회 임시 컨테이너에 복구해 회원·전적 수를 원본과 비교하고 worklog에 남긴다. 보관이 실패하면 알림을 받는다.
-- **한계**: VM이 통째로 사라지면 마지막 보관 이후의 변경(약 1분)을 잃는다. 대체안(Supabase)으로 가면 1시간 덤프라 최대 1시간을 잃는다.
+| 항목 | 내용 |
+| --- | --- |
+| 도구 | pgBackRest 2.60(PostgreSQL 컨테이너 안, [`deploy/postgres`](../../deploy/postgres)). R2는 S3 호환(`region=auto`, 경로 방식 주소)으로 동작함을 확인했다 |
+| 연속 보관 | `archive_mode=on`, `archive_timeout=60s`. 변경이 있으면 1분 안에 WAL 조각을 닫아 R2로 보낸다. 변경이 없으면 보내지 않는다 |
+| 전체·차등 백업 | 일요일 04:00 전체, 월~토 04:00 차등(서울 시각, systemd 타이머 [`deploy/systemd`](../../deploy/systemd)) |
+| 보관 | 전체 백업 4개(약 4주). 그보다 오래된 차등 백업·WAL은 함께 지워진다. 4주 안의 어느 시점으로든 복구할 수 있다 |
+| 암호화·압축 | `aes-256-cbc`(암호 `BACKUP_CIPHER_PASS`), zstd, 작은 파일 묶음(`repo1-bundle`) |
+| 알림 | 백업 실패(`backup.sh`)와 WAL 보관 실패·복구(`backup-check.sh`, 10분마다)를 Discord 웹후크로 보낸다. 같은 실패는 시작·복구 때 한 번씩만 알린다 |
+| R2 사용량(2026-11-27) | 객체 1,313개, 10 MiB. 전체 백업 1회 3.6 MiB(DB 약 30 MB), WAL 조각 1개 약 0.7 KB(처음 조각만 2 MB). 매분 조각이 생겨도 하루 수 MB라 무료 10 GB 안이다. 묶음을 켜기 전 첫 전체 백업(파일 약 1,290개)은 보관 기간이 지나면 지워진다 |
+
+- **비밀값**: R2 키·버킷·엔드포인트·백업 암호·웹후크는 `/opt/alkkagi/.env`에만 있다. **백업 암호를 잃으면 R2 백업을 풀 수 없으므로** VM 밖(비밀번호 관리자)에도 둔다. R2 API 토큰은 이 버킷의 객체 읽기·쓰기만 허용한다.
+- **처음 켜기**: `bash deploy/backup-setup.sh`(README [운영 서버 구축](../../README.md#운영-서버-구축) 8단계). postgres를 pgBackRest 이미지로 다시 만들고 stanza 생성 → `ALTER SYSTEM`으로 보관 설정 → 재시작 → `check` → 첫 전체 백업 → 타이머 설치 순서다. 보관 설정을 Compose가 아니라 데이터 디렉터리(`postgresql.auto.conf`)에 두는 것은 R2 설정 전에 보관을 켜면 실패한 WAL이 디스크에 쌓이기 때문이다.
+- **설정을 바꿀 때 주의**: `ALTER SYSTEM RESET archive_command`는 원래 명령이 아니라 빈 값으로 되돌린다(빈 값이면 보관이 멈추고 WAL이 VM에 쌓인다). 바꾼 뒤 되돌릴 때는 `ALTER SYSTEM SET archive_command = 'pgbackrest --stanza=alkkagi archive-push %p'`로 넣고 `pgbackrest check`로 확인한다.
+- **손실 범위·복구 시간(2026-11-27 측정)**: 쓰기 뒤 WAL이 R2에 닿기까지 35~46초. VM이 통째로 사라지면 최대 약 1분의 변경을 잃는다. 임시 컨테이너 복구는 8~9초(DB 30 MB)로 기준 24시간 안이다. 새 VM에서 다시 세우는 시간은 [README 운영 서버 구축](../../README.md#운영-서버-구축) 순서에 복구를 더한 것이다.
+
+#### 월 1회 복구 연습
+
+매달 첫 주에 한 번 한다. 운영 DB는 건드리지 않는다.
+
+1. `bash deploy/restore-drill.sh`: 최신 시점으로 임시 컨테이너(`alkkagi-restore-drill`)에 복구하고 회원 수·경기·승·패 합계와 마지막 사용자 번호를 운영 DB와 비교한다. 복구한 인스턴스는 WAL 보관을 끈다. 끝나면 컨테이너·볼륨을 지운다.
+2. 시점 복구도 한 번 본다: `bash deploy/restore-drill.sh '<YYYY-MM-DD HH:MM:SS+00>'`(몇 시간 전). 그 사이 가입이 있었다면 복구본의 회원 수가 그만큼 적어야 한다.
+3. `pgbackrest info`(컨테이너 안 `-u postgres`)로 전체 백업이 쌓이고 오래된 것이 지워지는지 본다. Discord에 최근 실패 알림이 없는지 본다.
+4. 결과(복구 시간, 회원·전적 비교, R2 사용량)를 그날 worklog에 남긴다. 다르면 원인을 찾을 때까지 작업으로 등록한다.
+
+**운영 DB 자체를 되돌려야 할 때**(사고 복구)는 서버를 멈추고 postgres 볼륨을 비운 뒤 `pgbackrest restore`로 복구한다. 이 절차는 아직 시험하지 않았다. 필요해지면 복구 연습과 같은 명령에 `--delta`를 써서 먼저 임시 컨테이너로 확인한 뒤 진행한다.
 
 ### 세션 비밀값 교체
 
