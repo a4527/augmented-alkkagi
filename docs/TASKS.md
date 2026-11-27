@@ -30,7 +30,7 @@
 | [CI-001](#ci-001-pr-검사-자동화) | PR 검사 자동화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6), [PR #12](https://github.com/a4527/augmented-alkkagi/pull/12) |
 | [SEC-001](#sec-001-서버-보안-강화) | 서버 보안 강화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/a4527/augmented-alkkagi/pull/14) |
 | [OPS-002](#ops-002-0원-호스팅-재검토) | 0원 호스팅 재검토 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #13](https://github.com/a4527/augmented-alkkagi/pull/13) |
-| [OPS-004](#ops-004-운영-서버-구축) | 운영 서버 구축 | P1 | OPS-002 | 완료 | Claude — 사용자 요청 수행 | 미생성 |
+| [OPS-004](#ops-004-운영-서버-구축) | 운영 서버 구축 | P1 | OPS-002 | 완료 | Claude — 사용자 요청 수행 | [PR #15](https://github.com/a4527/augmented-alkkagi/pull/15) |
 | [OPS-005](#ops-005-db-백업복구) | DB 백업·복구 | P1 | OPS-004 | 예정 | 미정 | 미생성 |
 | [OPS-003](#ops-003-배포-자동화) | 배포 자동화 | P1 | CI-001, OPS-004 | 예정 | 미정 | 미생성 |
 | [OBS-001](#obs-001-모니터링알림) | 모니터링·알림 | P1 | OPS-004 | 예정 | 미정 | 미생성 |
@@ -228,7 +228,7 @@ Issue·PR: 미생성
 의존성: OPS-002
 범위: [DEC-098](DECISIONS.md#결정-색인)·[ADR-0005](adr/0005-hosting-and-data.md)의 VM·도메인·Compose 구성을 만들고 서버·DB를 띄운다. 백업은 [OPS-005](#ops-005-db-백업복구), 자동 배포는 [OPS-003](#ops-003-배포-자동화), 모니터링은 [OBS-001](#obs-001-모니터링알림)에서 한다. 계정 생성·결제·비밀값 입력은 사용자가 하고 Claude는 설정 파일·절차를 준비한다.
 관련 문서: [OPERATIONS 운영 구성](design/OPERATIONS.md#운영-구성-승인-미구현), [PRD 비기능 요구사항](PRD.md#4-비기능-요구사항과-제약)
-Issue·PR: 미생성
+Issue·PR: [PR #15](https://github.com/a4527/augmented-alkkagi/pull/15)
 
 수용 기준:
 
