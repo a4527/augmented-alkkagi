@@ -15,7 +15,7 @@
 
 ## 남은 일과 한계
 
-- 지금 운영 중인 서비스는 없다(이전 Render 서비스는 일시 중지). 운영 서버 구성 파일과 구축 순서는 준비했고(2026-11-27, [README 운영 서버 구축](../README.md#운영-서버-구축)) HostHatch 주문 전 확인부터 사용자 차례다. 새 구성은 [OPS-004](TASKS.md#ops-004-운영-서버-구축)(서버 구축) → [OPS-005](TASKS.md#ops-005-db-백업복구)(백업)·[OPS-003](TASKS.md#ops-003-배포-자동화)(자동 배포)·[OBS-001](TASKS.md#obs-001-모니터링알림)(모니터링) → [POR-001](TASKS.md#por-001-itchio-배포)(itch.io) 순서로 진행한다([README 배포 접속](../README.md#배포-접속)).
+- 2026-11-27 운영 서버를 열었다: https://playalkkagi.com (HostHatch 서울 VM + Cloudflare, [OPS-004](TASKS.md#ops-004-운영-서버-구축) 진행 중). 백업·자동 배포·모니터링은 아직 없다. 남은 순서는 [OPS-005](TASKS.md#ops-005-db-백업복구)(백업)·[OPS-003](TASKS.md#ops-003-배포-자동화)(자동 배포)·[OBS-001](TASKS.md#obs-001-모니터링알림)(모니터링) → [POR-001](TASKS.md#por-001-itchio-배포)(itch.io)다([README 배포 접속](../README.md#배포-접속)).
 - PR마다 CI(검사·DB 테스트·비밀값 검사)가 돌고 `main`은 보호된다([CI-001](TASKS.md#ci-001-pr-검사-자동화)). 의존성 취약점은 알림으로 받아 운영 의존성 high 이상만 바로 고치고 나머지는 월 1회 정기 패치로 처리한다([DEC-095](DECISIONS.md#결정-색인), 첫 회 [MNT-001](TASKS.md#mnt-001-2026-12-정기-의존성-패치)). 부하 기준선은 아직 없다([VAL-003](TASKS.md#val-003-부하e2e-검증)). 급증 대응과 포털 빌드 세부(인증 방식·게스트 범위·CrazyGames SDK)는 미정이다.
 - 팀 시절에 진행 중이던 12건의 남은 확인(온라인 두 계정·DB 테스트, GPU 프레임 시간 측정, 사용자 실제 화면·소리 확인)은 이어 가지 않기로 했고 새 작업으로 등록하지 않았다([DEC-092](DECISIONS.md#결정-색인)). 필요해지면 TASKS에 새로 등록한다.
 - 물리·방해요소 수치는 제안값이며 플레이 테스트 후 [DECISIONS](DECISIONS.md)로 확정한다.

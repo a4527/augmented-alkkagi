@@ -87,9 +87,9 @@ DB 테스트는 `DATABASE_URL`이 설정된 환경에서 `npm run test:db`로 �
 
 ## 배포 접속
 
-현재 접속할 수 있는 운영 서비스는 없다. 이전 운영 주소(https://alkkagi-6q64.onrender.com, Render 무료 + Neon 무료)는 2026-11-25 확인 시 소유자가 일시 중지한 상태다.
+운영 주소: **https://playalkkagi.com** (2026-11-27 개통, [OPS-004](docs/TASKS.md#ops-004-운영-서버-구축)).
 
-2026-11-26 사용자 본인 계정의 새 구성으로 운영을 다시 열기로 했다([DEC-098](docs/DECISIONS.md#결정-색인), [ADR-0005](docs/adr/0005-hosting-and-data.md)): HostHatch VM에 서버·DB를 두고 자체 도메인(Cloudflare)으로 연결하며, itch.io를 시작으로 게임 포털에도 제출한다([DEC-097](docs/DECISIONS.md#결정-색인)). 주소는 구축([OPS-004](docs/TASKS.md#ops-004-운영-서버-구축)) 뒤 여기에 적는다. 배포·백업·모니터링 절차는 [OPERATIONS](docs/design/OPERATIONS.md)를 따른다. 그동안은 [서버 없이 AI·로컬 2인 실행](#서버-없이-ai로컬-2인-실행)으로 플레이한다.
+HostHatch 서울 VM 한 대에 서버·DB를 두고 Cloudflare로 연결한다([DEC-098](docs/DECISIONS.md#결정-색인), [ADR-0005](docs/adr/0005-hosting-and-data.md)). itch.io를 시작으로 게임 포털에도 제출할 예정이다([DEC-097](docs/DECISIONS.md#결정-색인)). 배포·백업·모니터링 절차는 [OPERATIONS](docs/design/OPERATIONS.md)를 따른다. 자동 배포·백업·모니터링은 아직 없다([OPS-003](docs/TASKS.md#ops-003-배포-자동화)·[OPS-005](docs/TASKS.md#ops-005-db-백업복구)·[OBS-001](docs/TASKS.md#obs-001-모니터링알림)). 이전 주소(https://alkkagi-6q64.onrender.com, Render + Neon)는 쓰지 않으며 데이터는 옮기지 않았다.
 
 ### 운영 서버 구축
 
@@ -107,7 +107,7 @@ DB 테스트는 `DATABASE_URL`이 설정된 환경에서 `npm run test:db`로 �
    bash /opt/alkkagi/app/deploy/vm-setup.sh deploy
    ```
 
-   새 터미널에서 `ssh deploy@<VM IP>`가 되는지 확인한 뒤 root 세션을 닫는다. 이후는 `deploy` 계정으로 한다.
+   새 터미널에서 `ssh deploy@<VM IP>`가 되는지 확인한 뒤 root 세션을 닫는다. 이후는 `deploy` 계정으로 한다. 첫 부팅 직후에는 자동 보안 업데이트가 20분가량 패키지 잠금을 잡고 있어 스크립트가 기다리다 멈출 수 있다. `pgrep -f unattended-upgrade`가 비면 다시 실행한다. 커널이 갱신됐으면(`/var/run/reboot-required`) 재부팅한다.
 
 6. **인증서·환경 파일**:
 
@@ -115,7 +115,11 @@ DB 테스트는 `DATABASE_URL`이 설정된 환경에서 `npm run test:db`로 �
    sudo chown -R deploy:deploy /opt/alkkagi/app
    sudo nano /opt/alkkagi/certs/origin.pem   # 4단계의 인증서
    sudo nano /opt/alkkagi/certs/origin.key   # 4단계의 개인 키
-   sudo chmod 600 /opt/alkkagi/certs/*
+   # 붙여넣기 때 터미널 제어 문자(ESC[200~)가 섞이면 openssl이 못 읽는다. 지운 뒤 권한을 줄인다.
+   # certs는 root만 열 수 있어 * 를 root 셸에서 펼친다.
+   sudo sh -c 'sed -i "s/\x1b\[20[01]~//g" /opt/alkkagi/certs/origin.*; chmod 600 /opt/alkkagi/certs/origin.*'
+   # 인증서·키 짝 확인(두 값이 같아야 한다)
+   sudo sh -c 'openssl x509 -in /opt/alkkagi/certs/origin.pem -noout -pubkey | sha256sum; openssl pkey -in /opt/alkkagi/certs/origin.key -pubout | sha256sum'
    cp /opt/alkkagi/app/deploy/env.example /opt/alkkagi/.env && chmod 600 /opt/alkkagi/.env
    nano /opt/alkkagi/.env                     # 도메인, openssl rand로 만든 비밀값
    ```
