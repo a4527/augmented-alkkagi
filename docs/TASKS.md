@@ -30,7 +30,7 @@
 | [CI-001](#ci-001-pr-검사-자동화) | PR 검사 자동화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6), [PR #12](https://github.com/a4527/augmented-alkkagi/pull/12) |
 | [SEC-001](#sec-001-서버-보안-강화) | 서버 보안 강화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/a4527/augmented-alkkagi/pull/14) |
 | [OPS-002](#ops-002-0원-호스팅-재검토) | 0원 호스팅 재검토 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #13](https://github.com/a4527/augmented-alkkagi/pull/13) |
-| [OPS-004](#ops-004-운영-서버-구축) | 운영 서버 구축 | P1 | OPS-002 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
+| [OPS-004](#ops-004-운영-서버-구축) | 운영 서버 구축 | P1 | OPS-002 | 완료 | Claude — 사용자 요청 수행 | 미생성 |
 | [OPS-005](#ops-005-db-백업복구) | DB 백업·복구 | P1 | OPS-004 | 예정 | 미정 | 미생성 |
 | [OPS-003](#ops-003-배포-자동화) | 배포 자동화 | P1 | CI-001, OPS-004 | 예정 | 미정 | 미생성 |
 | [OBS-001](#obs-001-모니터링알림) | 모니터링·알림 | P1 | OPS-004 | 예정 | 미정 | 미생성 |
@@ -223,7 +223,7 @@ Issue·PR: 미생성
 ## OPS-004 운영 서버 구축
 
 우선순위: P1
-상태: 진행 중
+상태: 완료
 담당: Claude — 사용자 요청 수행
 의존성: OPS-002
 범위: [DEC-098](DECISIONS.md#결정-색인)·[ADR-0005](adr/0005-hosting-and-data.md)의 VM·도메인·Compose 구성을 만들고 서버·DB를 띄운다. 백업은 [OPS-005](#ops-005-db-백업복구), 자동 배포는 [OPS-003](#ops-003-배포-자동화), 모니터링은 [OBS-001](#obs-001-모니터링알림)에서 한다. 계정 생성·결제·비밀값 입력은 사용자가 하고 Claude는 설정 파일·절차를 준비한다.
@@ -238,12 +238,11 @@ Issue·PR: 미생성
 - [x] Docker Compose로 Caddy·서버·PostgreSQL이 실행되고, 컨테이너 종료와 VM 재부팅 뒤 자동으로 다시 올라온다(실제로 재부팅해 확인).
 - [x] 대기 상태와 온라인 경기 1판 중의 메모리·디스크 사용량, 한국에서의 왕복 지연을 측정해 worklog에 남긴다.
 - [x] 두 계정으로 로그인 → 방 생성·입장 → 경기 종료 → 전적 반영까지 확인한다.
-- [ ] 운영 도메인 응답에 HSTS가 붙고, Cloudflare·Caddy를 거친 Socket.IO 연결이 출처 확인(`Host` 유지)을 통과하며 브라우저에 CSP 위반이 없다([SEC-001](#sec-001-서버-보안-강화)).
+- [x] 운영 도메인 응답에 HSTS가 붙고, Cloudflare·Caddy를 거친 Socket.IO 연결이 출처 확인(`Host` 유지)을 통과하며 브라우저에 CSP 위반이 없다([SEC-001](#sec-001-서버-보안-강화)).
 - [x] 기존 Neon 데이터 이전 여부를 사용자가 정하고, 이전 운영 서비스(Render·Neon·UptimeRobot 절전 방지 요청)를 정리한다. README 배포 접속 절을 새 주소로 고친다.
 
-진행: 2026-11-27 https://playalkkagi.com 개통([worklog](worklogs/2026-11-27.md#ops-004-운영-서버-구축)). 결제 주기·CPU 약관은 사용자 확인, 이전 서비스는 사용자 계정이 아니라 정리 대상 없음. 남은 것: Cloudflare가 넣는 분석 스크립트의 CSP 위반 처리.
 
-검증 근거: 작업일의 worklog
+검증 근거: [2026-11-27 worklog](worklogs/2026-11-27.md#ops-004-운영-서버-구축). https://playalkkagi.com 개통. 결제 주기·CPU 약관은 사용자가 주문 화면에서 확인했고, 이전 서비스는 사용자 계정이 아니라 정리 대상이 없다
 
 ## OPS-005 DB 백업·복구
 
