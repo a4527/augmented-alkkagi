@@ -31,6 +31,7 @@ const server = createAppServer({
   sessionSecret: config.sessionSecret,
   previousSessionSecret: config.previousSessionSecret,
   isProduction: config.isProduction,
+  trustProxyHops: config.trustProxyHops,
   staticDir,
 });
 

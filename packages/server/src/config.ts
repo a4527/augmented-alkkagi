@@ -5,6 +5,8 @@ export type ServerConfig = {
   previousSessionSecret?: string;
   port: number;
   isProduction: boolean;
+  /** 서버 앞 프록시 단계 수. Express `trust proxy`에 넣어 클라이언트 IP와 HTTPS 여부를 읽는다. */
+  trustProxyHops: number;
 };
 
 const MIN_SECRET_LENGTH = 32;
@@ -33,11 +35,18 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const port = env.PORT ? Number(env.PORT) : 3000;
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('PORT가 올바르지 않다.');
 
+  // 운영은 Cloudflare → Caddy 두 단계다(OPERATIONS 운영 구성). 로컬·테스트는 기본 1.
+  const trustProxyHops = env.TRUST_PROXY_HOPS ? Number(env.TRUST_PROXY_HOPS) : 1;
+  if (!Number.isInteger(trustProxyHops) || trustProxyHops < 0 || trustProxyHops > 5) {
+    throw new Error('TRUST_PROXY_HOPS는 0~5의 정수여야 한다.');
+  }
+
   return {
     databaseUrl,
     sessionSecret,
     ...(previousSessionSecret === undefined ? {} : { previousSessionSecret }),
     port,
     isProduction: env.NODE_ENV === 'production',
+    trustProxyHops,
   };
 }

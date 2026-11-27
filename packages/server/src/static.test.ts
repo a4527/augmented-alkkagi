@@ -6,6 +6,7 @@ import pg from 'pg';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createAppServer, type AppServer } from './app.ts';
+import { HTML_CACHE_CONTROL } from './static.ts';
 
 // 연결 풀은 요청이 DB를 건드릴 때만 연결하므로 이 테스트는 DB 없이 돌아간다.
 const SESSION_SECRET = 'x'.repeat(32);
@@ -56,6 +57,15 @@ describe('헬스체크·정적 파일·SPA fallback', () => {
       const res = await get(url).expect(200);
       expect(res.text).toContain('<title>app</title>');
     }
+  });
+
+  it('HTML은 no-transform으로 앞단이 고치지 못하게 하고 다른 자산은 그대로 둔다', async () => {
+    for (const url of ['/', '/lobby', '/index.html']) {
+      const res = await get(url).expect(200);
+      expect(res.headers['cache-control'], url).toBe(HTML_CACHE_CONTROL);
+    }
+    const asset = await get('/assets/app.js').expect(200);
+    expect(asset.headers['cache-control']).not.toContain('no-transform');
   });
 
   it('세션 쿠키가 있어도 정적 요청은 DB(세션 저장소)를 거치지 않는다', async () => {

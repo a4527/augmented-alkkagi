@@ -37,6 +37,8 @@ export type AppOptions = {
   previousSessionSecret?: string;
   /** 운영이면 세션 쿠키에 secure를 붙인다. */
   isProduction: boolean;
+  /** 서버 앞 프록시 단계 수(기본 1). 운영은 Cloudflare → Caddy라 2다. */
+  trustProxyHops?: number;
   /** 경기 서버 훅(IMPL-009)보다 먼저 불린다. 테스트가 시작·이탈을 관찰하거나 지연·실패시키는 자리다. */
   roomHooks?: RoomHooks;
   /** 빌드된 클라이언트 디렉터리. 없거나 `index.html`이 없으면 정적 파일을 제공하지 않는다. */
@@ -85,8 +87,9 @@ export function createAppServer(options: AppOptions): AppServer {
   const db = createDb(pool);
 
   const app = express();
-  // Render 프록시 1단. secure 쿠키와 IP당 빈도 제한이 이에 의존한다(AUTH).
-  app.set('trust proxy', 1);
+  // 프록시 단계 수만큼 X-Forwarded-For를 거슬러 클라이언트 IP를 읽는다. secure 쿠키와 IP당 빈도 제한이
+  // 이에 의존한다(AUTH 해시·프록시). 운영은 Cloudflare → Caddy 2단계다.
+  app.set('trust proxy', options.trustProxyHops ?? 1);
   app.disable('x-powered-by');
   // 보안 헤더는 헬스체크·정적 파일·API 모든 응답에 붙인다(AUTH HTTP 보안 헤더).
   app.use(securityHeaders({ isProduction }));

@@ -87,9 +87,59 @@ DB 테스트는 `DATABASE_URL`이 설정된 환경에서 `npm run test:db`로 �
 
 ## 배포 접속
 
-현재 접속할 수 있는 운영 서비스는 없다. 이전 운영 주소(https://alkkagi-6q64.onrender.com, Render 무료 + Neon 무료)는 2026-11-25 확인 시 소유자가 일시 중지한 상태다.
+운영 주소: **https://playalkkagi.com** (2026-11-27 개통, [OPS-004](docs/TASKS.md#ops-004-운영-서버-구축)).
 
-2026-11-26 사용자 본인 계정의 새 구성으로 운영을 다시 열기로 했다([DEC-098](docs/DECISIONS.md#결정-색인), [ADR-0005](docs/adr/0005-hosting-and-data.md)): HostHatch VM에 서버·DB를 두고 자체 도메인(Cloudflare)으로 연결하며, itch.io를 시작으로 게임 포털에도 제출한다([DEC-097](docs/DECISIONS.md#결정-색인)). 주소는 구축([OPS-004](docs/TASKS.md#ops-004-운영-서버-구축)) 뒤 여기에 적는다. 배포·백업·모니터링 절차는 [OPERATIONS](docs/design/OPERATIONS.md)를 따른다. 그동안은 [서버 없이 AI·로컬 2인 실행](#서버-없이-ai로컬-2인-실행)으로 플레이한다.
+HostHatch 서울 VM 한 대에 서버·DB를 두고 Cloudflare로 연결한다([DEC-098](docs/DECISIONS.md#결정-색인), [ADR-0005](docs/adr/0005-hosting-and-data.md)). itch.io를 시작으로 게임 포털에도 제출할 예정이다([DEC-097](docs/DECISIONS.md#결정-색인)). 배포·백업·모니터링 절차는 [OPERATIONS](docs/design/OPERATIONS.md)를 따른다. 자동 배포·백업·모니터링은 아직 없다([OPS-003](docs/TASKS.md#ops-003-배포-자동화)·[OPS-005](docs/TASKS.md#ops-005-db-백업복구)·[OBS-001](docs/TASKS.md#obs-001-모니터링알림)). 이전 주소(https://alkkagi-6q64.onrender.com, Render + Neon)는 쓰지 않으며 데이터는 옮기지 않았다.
+
+### 운영 서버 구축
+
+[OPS-004](docs/TASKS.md#ops-004-운영-서버-구축)의 구축 순서다. 구성과 선택 이유는 [OPERATIONS 서버 구성 파일](docs/design/OPERATIONS.md#서버-구성-파일)에 있다. 비밀값은 VM의 `/opt/alkkagi/.env`와 `/opt/alkkagi/certs`에만 두고 저장소·문서·채팅에 남기지 않는다.
+
+1. **주문 전 확인**: HostHatch에 가입해 주문 화면에서 서울(차선 도쿄) "NVMe 2 GB"의 월 가격·결제 주기·부가세와 약관의 CPU 사용 제한을 확인한다. 월 결제가 안 되거나, 부가세·도메인(`.com` 연 약 $10.5)을 합쳐 월 1만 원을 넘거나, 상시 CPU 사용 제한이 있으면 주문하지 않고 대체안([ADR-0005](docs/adr/0005-hosting-and-data.md#선택과-핵심-조건))으로 간다.
+2. **도메인**: 도메인을 사서 Cloudflare에 연결한다(Cloudflare Registrar면 자동).
+3. **VM 주문**: Ubuntu 24.04 LTS, SSH 공개 키를 등록한다.
+4. **Cloudflare 설정**: DNS에 VM IP의 A(IPv6가 있으면 AAAA) 레코드를 프록시 켬(주황 구름)으로 만든다. SSL/TLS 모드는 Full (strict), Edge Certificates의 Always Use HTTPS를 켠다. Origin Server에서 Origin CA 인증서(도메인과 `*.도메인`)를 만들어 인증서·개인 키를 받아 둔다.
+5. **VM 초기 설정**(root로 SSH 접속):
+
+   ```bash
+   apt-get update && apt-get -y install git
+   git clone https://github.com/a4527/augmented-alkkagi.git /opt/alkkagi/app
+   bash /opt/alkkagi/app/deploy/vm-setup.sh deploy
+   ```
+
+   새 터미널에서 `ssh deploy@<VM IP>`가 되는지 확인한 뒤 root 세션을 닫는다. 이후는 `deploy` 계정으로 한다. 첫 부팅 직후에는 자동 보안 업데이트가 20분가량 패키지 잠금을 잡고 있어 스크립트가 기다리다 멈출 수 있다. `pgrep -f unattended-upgrade`가 비면 다시 실행한다. 커널이 갱신됐으면(`/var/run/reboot-required`) 재부팅한다.
+
+6. **인증서·환경 파일**:
+
+   ```bash
+   sudo chown -R deploy:deploy /opt/alkkagi/app
+   sudo nano /opt/alkkagi/certs/origin.pem   # 4단계의 인증서
+   sudo nano /opt/alkkagi/certs/origin.key   # 4단계의 개인 키
+   # 붙여넣기 때 터미널 제어 문자(ESC[200~)가 섞이면 openssl이 못 읽는다. 지운 뒤 권한을 줄인다.
+   # certs는 root만 열 수 있어 * 를 root 셸에서 펼친다.
+   sudo sh -c 'sed -i "s/\x1b\[20[01]~//g" /opt/alkkagi/certs/origin.*; chmod 600 /opt/alkkagi/certs/origin.*'
+   # 인증서·키 짝 확인(두 값이 같아야 한다)
+   sudo sh -c 'openssl x509 -in /opt/alkkagi/certs/origin.pem -noout -pubkey | sha256sum; openssl pkey -in /opt/alkkagi/certs/origin.key -pubout | sha256sum'
+   cp /opt/alkkagi/app/deploy/env.example /opt/alkkagi/.env && chmod 600 /opt/alkkagi/.env
+   nano /opt/alkkagi/.env                     # 도메인, openssl rand로 만든 비밀값
+   ```
+
+7. **설정 검사와 실행**:
+
+   ```bash
+   cd /opt/alkkagi/app
+   COMPOSE="docker compose --env-file /opt/alkkagi/.env -f deploy/compose.yaml"
+   $COMPOSE config --quiet
+   docker run --rm -e ALKKAGI_DOMAIN="$(grep '^ALKKAGI_DOMAIN=' /opt/alkkagi/.env | cut -d= -f2)" \
+     -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" \
+     -v /opt/alkkagi/caddy/cloudflare-trusted.caddy:/etc/caddy/cloudflare-trusted.caddy:ro \
+     -v /opt/alkkagi/certs:/certs:ro caddy:2 caddy validate --config /etc/caddy/Caddyfile
+   $COMPOSE up -d --build
+   $COMPOSE ps
+   curl -fsS https://<도메인>/health
+   ```
+
+   두 검사가 오류 없이 끝나야 실행한다. 서버를 다시 빌드·실행할 때는 `git pull` 뒤 `$COMPOSE up -d --build`를 쓴다(자동 배포는 [OPS-003](docs/TASKS.md#ops-003-배포-자동화)).
 
 ## 출처
 
