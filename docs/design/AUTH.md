@@ -48,6 +48,7 @@
 
 - **CSP**: `default-src`·`script-src`·`style-src`·`img-src`·`font-src`·`media-src`·`connect-src`·`worker-src`를 모두 `'self'`로 둔다. 클라이언트의 스크립트·스타일·글꼴·이미지·소리·영상·Worker·SharedWorker·API·Socket.IO가 모두 같은 출처이고 외부 CDN을 쓰지 않기 때문이다. `connect-src 'self'`는 같은 호스트의 `ws:`·`wss:`도 허용한다(CSP Level 3). `object-src 'none'`, `base-uri 'none'`, `form-action 'self'`, `frame-ancestors 'none'`(다른 사이트의 iframe 금지, 포털 허용은 POR-001). 인라인 스크립트·스타일·`eval`은 허용하지 않는다. React의 `style` 속성은 CSSOM으로 적용돼 막히지 않는다.
 - **Zod JIT**: Zod 4는 객체 스키마를 만들 때 `Function('')`으로 JIT 가능 여부를 시험해 CSP 위반 보고를 남긴다(검증은 일반 경로로 정상 동작). 브라우저 진입점(`main.tsx`·`ai-worker.ts`·`local-worker.ts`)이 첫 import로 `@alkkagi/shared/no-jit`을 불러 스키마가 만들어지기 전에 JIT를 끈다. 서버는 CSP 대상이 아니라 끄지 않는다.
+- **앞단의 HTML 변경 막기**: Cloudflare는 프록시한 HTML에 Web Analytics 스크립트(`static.cloudflareinsights.com`)를 자동으로 넣어 CSP 위반을 남긴다. HTML 응답(`index.html`·SPA fallback)에 `Cache-Control: public, max-age=0, no-transform`을 붙여 Cloudflare가 HTML을 고치지 않게 한다(`static.ts`, [OPS-004](../TASKS.md#ops-004-운영-서버-구축)). 대시보드 설정과 상관없이 막기 위해서다.
 - **그 밖**: `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`. 운영(`NODE_ENV=production`)에서만 `Strict-Transport-Security: max-age=31536000`을 붙인다. `includeSubDomains`·`preload`는 도메인을 정할 때([OPS-004](../TASKS.md#ops-004-운영-서버-구축)) 판단한다.
 - 화면별 확인 결과는 [worklog](../worklogs/2026-11-27.md#sec-001-서버-보안-강화)에 있다.
 

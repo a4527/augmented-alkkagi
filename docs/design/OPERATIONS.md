@@ -84,7 +84,7 @@
 
 ### SPA fallback
 
-`/api`·`/socket.io`·`/health`를 제외한 GET 요청은 `index.html`을 반환한다. 이 경로 밖에서 파일 확장자가 있는 요청(정적 자산)이 없으면 404를 반환하고 `index.html`로 대체하지 않는다.
+`/api`·`/socket.io`·`/health`를 제외한 GET 요청은 `index.html`을 반환한다. HTML 응답은 `Cache-Control: public, max-age=0, no-transform`이다(앞단이 HTML에 스크립트를 넣지 못하게, [AUTH HTTP 보안 헤더](AUTH.md#http-보안-헤더)). 이 경로 밖에서 파일 확장자가 있는 요청(정적 자산)이 없으면 404를 반환하고 `index.html`로 대체하지 않는다.
 
 포털 빌드([DEC-097](../DECISIONS.md#결정-색인))는 정적 파일을 포털이 서비스하므로 이 규칙은 자체 도메인의 웹 접속에만 적용된다.
 
