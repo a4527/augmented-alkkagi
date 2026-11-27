@@ -15,7 +15,16 @@
 
 ## 전체 구성과 경계
 
-발표용 흐름 구성도: [PNG](diagrams/architecture.png) · [편집 가능한 SVG](diagrams/architecture.svg). 코드와 승인된 배포 설계를 함께 표현하며 운영 배포 확인을 뜻하지 않는다.
+itch.io 1단계 기준 구성도(2026-11-27, [DOC-017](TASKS.md#doc-017-itch-기준-아키텍처-그림)). 실선은 운영 중, 회색 점선은 계획, 분홍 점선은 itch 때문에 바뀌거나 미정인 곳이다.
+
+| 그림 | 보여 주는 것 | 파일 |
+| --- | --- | --- |
+| 전체 구성도 | 플레이어·Cloudflare·VM(Caddy·서버·PostgreSQL)·외부 서비스·운영 경로 | [PNG](diagrams/itch-overview.png) · [SVG](diagrams/itch-overview.svg) |
+| 배포 상세 | 지금·계획 배포 경로, VM 방화벽·SSH·타이머·Docker 네트워크·비밀 파일 위치 | [PNG](diagrams/itch-deploy.png) · [SVG](diagrams/itch-deploy.svg) |
+| 데이터 흐름도 | 로그인부터 경기·전적 저장·백업까지 순서 | [PNG](diagrams/itch-dataflow.png) · [SVG](diagrams/itch-dataflow.svg) |
+| 논리 아키텍처 | 브라우저·서버 계층과 공용 패키지, itch로 바뀌는 곳 | [PNG](diagrams/itch-logical.png) · [SVG](diagrams/itch-logical.svg) |
+
+팀 시절(Render·Neon) 발표용 구성도는 [PNG](diagrams/architecture.png) · [SVG](diagrams/architecture.svg)로 남겨 둔다. 지금 구성과 다르다.
 
 하나의 웹 서비스가 정적 클라이언트, REST API, Socket.IO 실시간 연결을 함께 제공한다. 게임 판정은 서버만 하고, 규칙·물리는 브라우저(로컬 모드)와 서버가 같은 `game-core` 패키지를 쓴다.
 
