@@ -28,7 +28,7 @@
 | [DOC-015](#doc-015-포트폴리오-1부-단일-html) | 포트폴리오 1부 단일 HTML | P2 | 없음 | 완료 | Claude — 사용자 요청 수행 | 미생성 |
 | [DOC-016](#doc-016-운영-보완-결정과-작업-등록) | 운영 보완 결정과 작업 등록 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6) |
 | [CI-001](#ci-001-pr-검사-자동화) | PR 검사 자동화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6), [PR #12](https://github.com/a4527/augmented-alkkagi/pull/12) |
-| [SEC-001](#sec-001-서버-보안-강화) | 서버 보안 강화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | 미생성 |
+| [SEC-001](#sec-001-서버-보안-강화) | 서버 보안 강화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/a4527/augmented-alkkagi/pull/14) |
 | [OPS-002](#ops-002-0원-호스팅-재검토) | 0원 호스팅 재검토 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #13](https://github.com/a4527/augmented-alkkagi/pull/13) |
 | [OPS-004](#ops-004-운영-서버-구축) | 운영 서버 구축 | P1 | OPS-002 | 예정 | 미정 | 미생성 |
 | [OPS-005](#ops-005-db-백업복구) | DB 백업·복구 | P1 | OPS-004 | 예정 | 미정 | 미생성 |
@@ -168,7 +168,7 @@ Issue·PR: [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6), [PR #12](
 의존성: 없음
 범위: HTTP 보안 헤더와 Socket.IO 연결·메시지 경계를 강화한다. 대상은 출처 확인, 메시지 크기, 경기 명령·조준 스트림 빈도 제한이다. 사용자당 소켓 연결은 이미 1개로 대체되므로(`realtime/connections.ts`) 연결 수 제한은 범위에서 뺀다. 인증 방식·세션 정책은 바꾸지 않는다. 포털 출처 허용은 [POR-001](#por-001-itchio-배포)에서 다룬다.
 관련 문서: [AUTH](design/AUTH.md), [API](design/API.md), [ENGINEERING-VALIDATION 비공개 정보·권한](ENGINEERING-VALIDATION.md#최소-측정-항목)
-Issue·PR: 미생성
+Issue·PR: [PR #14](https://github.com/a4527/augmented-alkkagi/pull/14)
 
 수용 기준:
 
