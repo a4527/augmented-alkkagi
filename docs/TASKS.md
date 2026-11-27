@@ -27,7 +27,7 @@
 | [DOC-014](#doc-014-팀-시절-작업진행-기록-분리) | 팀 시절 작업·진행 기록 분리 | P1 | DOC-013 | 완료 | Claude — 사용자 요청 수행 | [PR #3](https://github.com/a4527/augmented-alkkagi/pull/3) |
 | [DOC-015](#doc-015-포트폴리오-1부-단일-html) | 포트폴리오 1부 단일 HTML | P2 | 없음 | 완료 | Claude — 사용자 요청 수행 | 미생성 |
 | [DOC-016](#doc-016-운영-보완-결정과-작업-등록) | 운영 보완 결정과 작업 등록 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6) |
-| [DOC-017](#doc-017-itch-기준-아키텍처-그림) | itch 기준 아키텍처 그림 | P2 | OPS-004 | 완료 | Claude — 사용자 요청 수행 | 미생성 |
+| [DOC-017](#doc-017-itch-기준-아키텍처-그림) | itch 기준 아키텍처 그림 | P2 | OPS-004 | 완료 | Claude — 사용자 요청 수행 | [PR #17](https://github.com/a4527/augmented-alkkagi/pull/17) |
 | [CI-001](#ci-001-pr-검사-자동화) | PR 검사 자동화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6), [PR #12](https://github.com/a4527/augmented-alkkagi/pull/12) |
 | [SEC-001](#sec-001-서버-보안-강화) | 서버 보안 강화 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/a4527/augmented-alkkagi/pull/14) |
 | [OPS-002](#ops-002-0원-호스팅-재검토) | 0원 호스팅 재검토 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #13](https://github.com/a4527/augmented-alkkagi/pull/13) |
@@ -148,7 +148,7 @@ Issue·PR: [PR #6](https://github.com/a4527/augmented-alkkagi/pull/6)
 의존성: OPS-004
 범위: 사용자 요청으로 itch.io 1단계 기준의 전체 구성도(사용자가 준 참고 그림 형식)·배포 상세·데이터 흐름도·논리 아키텍처 4장을 그려 `docs/diagrams/`에 SVG·PNG로 두고 DESIGN에서 연결한다. 운영 중·계획·itch 때문에 바뀌거나 미정인 곳을 선 모양으로 구분하며, 미정 사항(포털 인증 방식·게스트)을 확정처럼 그리지 않는다. 팀 시절 구성도(`architecture.*`)는 다른 기록이 링크하므로 지우지 않는다.
 관련 문서: [DESIGN](DESIGN.md#전체-구성과-경계), [OPERATIONS](design/OPERATIONS.md), [POR-001](#por-001-itchio-배포)
-Issue·PR: 미생성
+Issue·PR: [PR #17](https://github.com/a4527/augmented-alkkagi/pull/17)
 
 수용 기준:
 
