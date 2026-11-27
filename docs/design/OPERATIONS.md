@@ -29,7 +29,7 @@
 
 - **서버**: HostHatch 2GB VM 1대. 주문할 때 위치별 월 가격·결제 주기·부가세·공유 CPU 약관을 확인하고([비용·한도 확인](#비용한도-확인-2026-11-26)), 조건이 어긋나면 대체안(Vultr 서울 1GB + Supabase 서울 무료 + 1시간 덤프)으로 간다.
 - **도메인·앞단**: 자체 도메인을 Cloudflare 무료 DNS·프록시로 운영한다. 포털 빌드에 고정되는 서버 주소는 이 도메인이다. 프록시가 Cloudflare → Caddy 두 단계라 서버는 `TRUST_PROXY_HOPS=2`로 클라이언트 IP를 읽는다([AUTH 해시·프록시](AUTH.md#해시프록시), 아래 [서버 구성 파일](#서버-구성-파일)).
-- **DB**: 같은 VM의 PostgreSQL. 진행 중 경기 상태는 서버 메모리, 방 정보(`rooms`)·회원·전적·세션은 DB에 둔다([DEC-023](../DECISIONS.md#결정-색인)). 게스트는 저장하지 않는다([DEC-097](../DECISIONS.md#결정-색인)).
+- **DB**: 같은 VM의 PostgreSQL. 이전 Neon 데이터는 옮기지 않고 새로 시작한다(2026-11-27 사용자 결정). 진행 중 경기 상태는 서버 메모리, 방 정보(`rooms`)·회원·전적·세션은 DB에 둔다([DEC-023](../DECISIONS.md#결정-색인)). 게스트는 저장하지 않는다([DEC-097](../DECISIONS.md#결정-색인)).
 - **환경 설정 이름**: 서버는 `DATABASE_URL`, `SESSION_SECRET`, `SESSION_SECRET_PREVIOUS`(교체 중에만), `PORT`, `NODE_ENV`, `TRUST_PROXY_HOPS`를 읽는다. 운영 Compose는 VM의 `/opt/alkkagi/.env`에서 `ALKKAGI_DOMAIN`, `POSTGRES_PASSWORD`, `SESSION_SECRET`(·`SESSION_SECRET_PREVIOUS`)를 받아 나머지를 채운다([`deploy/env.example`](../../deploy/env.example)). 로컬은 `.env`와 값이 없는 `.env.example`을 쓰고, 운영 값은 VM의 저장소 밖 환경 파일과 GitHub 비밀 저장소에만 둔다. 값과 비밀정보는 문서에 기록하지 않는다.
 - **메모리 예산**: OS·Docker, Caddy, Node, PostgreSQL, Alloy를 2GB 안에 둔다. 각 사용량은 추정이라 구축 때 측정한다([OPS-004](../TASKS.md#ops-004-운영-서버-구축)).
 - **디스크(10GB)**: Docker 이미지 정리, 로그 순환, 로컬 WAL 보관 상한을 둔다.
@@ -67,6 +67,7 @@
 | Grafana Cloud Free | 활성 시계열 10k, 로그·트레이스 각 월 50 GB, 보관 14일, 사용자 3명. 요금 페이지에 요금 체계 변경 예고 문구가 있어 도입 때 다시 확인한다 | [Pricing](https://grafana.com/pricing/) |
 | UptimeRobot Free | 모니터 50개, 5분 간격, 상태 페이지 1개, 개인·상업 프로젝트 허용. 무료 알림 채널에 Discord 포함(Slack·Telegram·webhook은 유료) | [Pricing](https://uptimerobot.com/pricing/), [Integrations](https://help.uptimerobot.com/en/articles/11361285-uptimerobot-integrations-basic-information-overview) |
 | Sentry Developer | 오류 5k(월 단위로 추정, 미확인), 보관 30일, 사용자 1명, 알림은 이메일 | [Pricing](https://sentry.io/pricing/) |
+| HostHatch 서울 (2026-11-27 사용자 확인) | 주문 화면에 한국(서울) 2 GB VM이 월 $4로 있다. 부가세 10%를 붙여도 $4.40, `.com` 도메인(연 약 $10.46 ≈ 월 $0.87)을 더해 월 약 $5.3로 월 1만 원 기준 안이다. 결제 주기(월 결제 가능 여부)와 CPU 공정 사용 약관은 주문 때 확인한다 | 주문 화면(가입 뒤) |
 | 대체안 Vultr 서울 | `vc2-1c-1gb` 1 vCPU·1 GB·1 TB $5, `vc2-1c-2gb` $10. 한국 부가세 10% 부과 | 공개 API `api.vultr.com/v2/plans`, [VAT](https://docs.vultr.com/support/platform/billing/does-vultr-collect-vat-or-sales-tax) |
 | 대체안 Supabase Free | 사용 시간 한도 명시 없음, DB 500 MB, 전송 5 GB, 1주 비활성 시 일시 정지, 무료 플랜 백업 없음. 무료 플랜의 서울 선택 가능 여부는 미확인 | [Pricing](https://supabase.com/pricing), [Backups](https://supabase.com/docs/guides/platform/backups) |
 
@@ -185,7 +186,6 @@
 ## 남은 미정·구현 단계 확인
 
 - HostHatch 위치별 월 가격·결제 주기·부가세·공유 CPU 약관: 주문 때 확인한다([OPS-004](../TASKS.md#ops-004-운영-서버-구축)).
-- 기존 Neon 데이터를 옮길지: 미정(기본안은 새로 시작).
 - 급증 대응(동시 경기 상한 값과 안내 방식): 미정([PRD](../PRD.md#4-비기능-요구사항과-제약)).
 - 자동 배포 절차(이미지 저장소·배포 방법·배포 뒤 확인·롤백): [OPS-003](../TASKS.md#ops-003-배포-자동화)에서 정한다.
 - 측정 합격 목표값 중 PRD에 없는 항목: 첫 측정 뒤 정한다([ENGINEERING-VALIDATION](../ENGINEERING-VALIDATION.md)).
