@@ -40,8 +40,10 @@ echo "$DEPLOY_USER ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/90-$DEPLOY_USER"
 chmod 440 "/etc/sudoers.d/90-$DEPLOY_USER"
 visudo -cf "/etc/sudoers.d/90-$DEPLOY_USER"
 
-# SSH: 키 로그인만, root는 키로만. 설정 검사가 통과할 때만 다시 읽는다.
-cat > /etc/ssh/sshd_config.d/10-alkkagi.conf <<'CONF'
+# SSH: 키 로그인만, root는 키로만. sshd는 같은 항목의 첫 값을 쓰고 HostHatch 이미지에
+# 01-hosthatch.conf(PermitRootLogin yes)가 있으므로 그보다 먼저 읽히는 00-으로 둔다.
+rm -f /etc/ssh/sshd_config.d/10-alkkagi.conf
+cat > /etc/ssh/sshd_config.d/00-alkkagi.conf <<'CONF'
 PasswordAuthentication no
 KbdInteractiveAuthentication no
 PermitRootLogin prohibit-password
@@ -49,6 +51,14 @@ PubkeyAuthentication yes
 CONF
 sshd -t
 systemctl reload ssh
+# 실제로 적용된 값을 확인한다. 다르면 여기서 멈춘다.
+effective=$(sshd -T | grep -E '^(passwordauthentication|kbdinteractiveauthentication|permitrootlogin) ' | sort)
+expected=$'kbdinteractiveauthentication no\npasswordauthentication no\npermitrootlogin without-password'
+if [ "$effective" != "$expected" ]; then
+  echo "SSH 설정이 기대와 다르다:" >&2
+  echo "$effective" >&2
+  exit 1
+fi
 
 # 스왑 2GB: 이미지 빌드·순간 메모리 증가로 OOM이 나지 않게 한다.
 if ! swapon --show | grep -q '/swapfile'; then
