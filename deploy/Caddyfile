@@ -7,6 +7,8 @@
 		# Cloudflare IP 대역(deploy/cloudflare-ips.sh가 만든다)에서 온 요청만 X-Forwarded-For를 이어 붙인다.
 		# 서버는 TRUST_PROXY_HOPS=2로 그 앞의 클라이언트 IP를 읽는다.
 		import /etc/caddy/cloudflare-trusted.caddy
+		# Cloudflare는 서버로 TCP(HTTP/1.1·2)로만 접속한다. UDP 443은 방화벽에서 열지 않으므로 HTTP/3를 끈다.
+		protocols h1 h2
 	}
 }
 
