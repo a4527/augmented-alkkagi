@@ -4,7 +4,7 @@
 
 | 구분 | 상태 |
 | --- | --- |
-| 승인된 미구현 설계 | 기술 스택·배포 서비스 ([DEC-013](../DECISIONS.md#결정-색인), [ADR-0003](../adr/0003-tech-stack-and-architecture.md)) |
+| 승인된 미구현 설계 | 기술 스택 ([DEC-013](../DECISIONS.md#결정-색인), [ADR-0003](../adr/0003-tech-stack-and-architecture.md)). 운영 인프라·모니터링 ([DEC-098](../DECISIONS.md#결정-색인), [ADR-0005](../adr/0005-hosting-and-data.md), [DEC-099](../DECISIONS.md#결정-색인)) |
 | 현재 구현 | 프로젝트 골격(npm workspaces 5개 패키지·빌드·테스트·린트, [IMPL-001](../legacy/TASKS-team.md#impl-001-프로젝트-골격)) |
 | 승인된 에셋 조달 방식 | 종류별 방식·기록 위치·용량 한도([DEC-033](../DECISIONS.md#결정-색인)) |
 | 미정 | 골격에 없는 라이브러리의 버전(쓰는 작업에서 고정), Claude·효과음 도구·글꼴 이용 조건 확인(구현 단계) |
@@ -22,8 +22,9 @@
 | 서버·통신 | Node.js 24 LTS, Express, Socket.IO | [API](API.md) |
 | 물리 | 직접 구현 (2D 원 충돌 + 높이), `game-core`에 포함 | [GAME](GAME.md) |
 | 검증·인증 | Zod, express-session, connect-pg-simple, @node-rs/argon2 (argon2id) | [AUTH](AUTH.md) |
-| 저장 | PostgreSQL (Neon 무료 플랜), Drizzle ORM, node-postgres(pg) | [DATABASE](DATABASE.md) |
-| 배포 | Render 무료 웹 서비스 1개 + 외부 헬스체크 요청, 싱가포르 리전. 월 0원 조건으로 다른 호스팅과 비교 중([DEC-094](../DECISIONS.md#결정-색인), [OPS-002](../TASKS.md#ops-002-0원-호스팅-재검토)) | [OPERATIONS](OPERATIONS.md) |
+| 저장 | PostgreSQL, Drizzle ORM, node-postgres(pg). 운영 DB는 서버 VM 안의 PostgreSQL이며 WAL·전체 백업을 Cloudflare R2에 둔다(승인, 미구현. 이전은 Neon 무료 플랜) | [DATABASE](DATABASE.md)·[OPERATIONS](OPERATIONS.md#백업복구) |
+| 배포 | HostHatch 2GB VM(서울 우선, 도쿄 차선) + Docker Compose(Caddy·서버·PostgreSQL·Alloy) + 자체 도메인(Cloudflare 무료 DNS·프록시). 월 1만 원 이하(승인, 미구현, [DEC-098](../DECISIONS.md#결정-색인)). 이전은 Render 무료 웹 서비스 | [OPERATIONS](OPERATIONS.md#운영-구성-승인-미구현) |
+| 모니터링 | UptimeRobot(다운 알림), Grafana Cloud Free + Alloy(지표·로그), Sentry Developer(오류) (승인, 미구현, [DEC-099](../DECISIONS.md#결정-색인)) | [OPERATIONS](OPERATIONS.md#모니터링) |
 | 품질 | Vitest, ESLint, Prettier, tsx, tsup | [LOCAL](LOCAL.md)·[검증 계획](../ENGINEERING-VALIDATION.md) |
 
 `game-runtime`은 서버·로컬 2인·AI 대전이 함께 쓰는 경기 실행 패키지로 [DEC-030](../DECISIONS.md#결정-색인)에서 추가했다. ADR-0003의 패키지 목록은 결정 당시 기록이라 고치지 않았다.

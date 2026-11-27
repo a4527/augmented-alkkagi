@@ -25,10 +25,10 @@
   ├─ AI 대전: AiGameSession → Web Worker의 game-runtime + game-core (서버 미사용)
   └─ 온라인: RemoteGameSession ──REST·Socket.IO──┐
                                                   ▼
-서버 (server: Express + Socket.IO, Render 웹 서비스 1개)
+서버 (server: Express + Socket.IO, VM 1대의 Docker 컨테이너. 승인·미구현, 이전 Render)
   ├─ 인증·세션 (express-session, argon2id)
   ├─ 방(DB rooms)·대전 진행(메모리) → game-runtime(큐·틱·뷰 배포)이 game-core로 판정
-  └─ 영구 데이터 (Drizzle) ──→ PostgreSQL (Neon)
+  └─ 영구 데이터 (Drizzle) ──→ PostgreSQL (같은 VM, R2 백업. 승인·미구현, 이전 Neon)
 공용: shared (타입·Zod 스키마·방해요소/판 데이터), game-core (순수 TypeScript), game-runtime (시계·전송 주입, DEC-030)
 ```
 
@@ -37,8 +37,8 @@
 | 사용자 화면·입력 | `client`. 입력을 명령으로 바꾸고 받은 뷰를 3D로 표시. 실시간 상태 보간은 ADR-0004 승인 | [게임](design/GAME.md)·[API](design/API.md) |
 | 방·대전 진행 | 방 정보는 DB `rooms`, 경기 진행 상태는 `server` 메모리. 판정은 `game-core` | [게임](design/GAME.md) |
 | 인증·권한 | `server`의 세션 미들웨어와 Socket.IO 연결 인증, 입력은 `shared`의 Zod 스키마로 검증 | [인증](design/AUTH.md) |
-| 영구 데이터 | `server` → PostgreSQL(Neon): 회원·전적·방·세션 | [DB](design/DATABASE.md) |
-| 실행·배포 | 모노레포 로컬 실행, Render 배포 | [로컬](design/LOCAL.md)·[운영](design/OPERATIONS.md) |
+| 영구 데이터 | `server` → PostgreSQL: 회원·전적·방·세션. 운영 DB는 VM 안 PostgreSQL로 옮긴다([DEC-098](DECISIONS.md#결정-색인)) | [DB](design/DATABASE.md) |
+| 실행·배포 | 모노레포 로컬 실행, VM(Docker Compose) 배포와 게임 포털 제출([DEC-097](DECISIONS.md#결정-색인)·[DEC-098](DECISIONS.md#결정-색인), 승인·미구현) | [로컬](design/LOCAL.md)·[운영](design/OPERATIONS.md) |
 
 ## 핵심 데이터 흐름
 

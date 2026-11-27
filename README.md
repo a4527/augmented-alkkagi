@@ -42,8 +42,8 @@
 | 클라이언트 | TypeScript, Vite, React, Three.js(React Three Fiber) |
 | 서버 | Node.js 24, Express, Socket.IO |
 | 인증·검증 | express-session(세션을 DB에 저장), argon2id, Zod |
-| 저장 | PostgreSQL(Neon 무료 플랜), Drizzle ORM |
-| 배포 | Render 무료 웹 서비스 1개, 싱가포르 리전 |
+| 저장 | PostgreSQL, Drizzle ORM. 운영 DB는 서버 VM 안으로 옮기고 Cloudflare R2에 백업한다(예정, [DEC-098](docs/DECISIONS.md#결정-색인)) |
+| 배포 | HostHatch VM(서울 우선) + Docker Compose + 자체 도메인(Cloudflare)으로 옮긴다(예정, [ADR-0005](docs/adr/0005-hosting-and-data.md)). 이전 운영은 Render 무료 웹 서비스 + Neon 무료 플랜이었다 |
 
 npm workspaces 모노레포이며 패키지는 `client`·`server`·`game-core`·`game-runtime`·`shared` 다섯 개다. 채택 이유와 대안은 [TECH_STACK](docs/design/TECH_STACK.md)과 [ADR-0003](docs/adr/0003-tech-stack-and-architecture.md)에 있다.
 
@@ -79,7 +79,7 @@ npm run dev -w @alkkagi/client -- --host 127.0.0.1
 
 로컬 창을 닫거나 새로고침하면 이탈로 처리한다. 새 로컬 경기를 만들려면 두 창을 모두 닫고 다시 연다. 오래 가려진 탭의 타이머 제한은 [로컬 실행의 한계](docs/design/LOCAL.md#로컬-2인-구성-창-2개)를 확인한다.
 
-온라인 서버는 PostgreSQL 연결 설정 `DATABASE_URL`(운영은 Neon 무료 플랜의 연결 문자열)과 32자 이상인 `SESSION_SECRET`이 필요하다. 변수 이름은 [.env.example](.env.example)에 있으며 복사해 `.env`로 만들고 값을 채운다. 환경에 값을 설정한 뒤 `npm run db:migrate -w @alkkagi/server`, `npm run dev -w @alkkagi/server`를 실행한다. 마이그레이션 명령은 루트 `.env`도 읽지만 개발 서버 명령은 프로세스 환경을 읽는다. `/`(로그인·로비·대기실)는 서버를 띄운 뒤 개발 서버로 연다.
+온라인 서버는 PostgreSQL 연결 설정 `DATABASE_URL`(PostgreSQL 연결 문자열)과 32자 이상인 `SESSION_SECRET`이 필요하다. 변수 이름은 [.env.example](.env.example)에 있으며 복사해 `.env`로 만들고 값을 채운다. 환경에 값을 설정한 뒤 `npm run db:migrate -w @alkkagi/server`, `npm run dev -w @alkkagi/server`를 실행한다. 마이그레이션 명령은 루트 `.env`도 읽지만 개발 서버 명령은 프로세스 환경을 읽는다. `/`(로그인·로비·대기실)는 서버를 띄운 뒤 개발 서버로 연다.
 
 DB 테스트는 `DATABASE_URL`이 설정된 환경에서 `npm run test:db`로 실행한다. 연결 계정에 임시 DB 생성·삭제 권한이 필요하고, 테스트는 임시 DB를 만들었다가 지운다. 환경변수 실제 값과 비밀정보는 문서에 적지 않는다. PR마다 GitHub Actions가 위 검사와 `test:db`(PostgreSQL 컨테이너), 비밀값 검사를 실행하며 통과해야 `main`에 병합된다([워크플로](.github/workflows/ci.yml)).
 
@@ -87,9 +87,9 @@ DB 테스트는 `DATABASE_URL`이 설정된 환경에서 `npm run test:db`로 �
 
 ## 배포 접속
 
-운영 서비스는 https://alkkagi-6q64.onrender.com 이다. 웹 서비스는 Render 무료 플랜, DB는 Neon PostgreSQL 무료 플랜이고 둘 다 싱가포르 리전이다. `/health`가 `{ "status": "ok" }`를 돌려주며, 가입한 뒤 로비에서 방을 만들거나 `/ai`에서 AI와 대전한다. 무료 서비스는 15분 동안 요청이 없으면 절전해 첫 접속이 약 1분 걸릴 수 있고, 외부 헬스체크가 10분마다 요청해 이를 줄인다. 배포·롤백·무료 한도 절차는 [OPERATIONS](docs/design/OPERATIONS.md)를 따른다.
+현재 접속할 수 있는 운영 서비스는 없다. 이전 운영 주소(https://alkkagi-6q64.onrender.com, Render 무료 + Neon 무료)는 2026-11-25 확인 시 소유자가 일시 중지한 상태다.
 
-2026-11-25 확인 시 이 서비스는 소유자가 일시 중지해 접속되지 않는다. 개인 프로젝트 전환 후 운영을 다시 열지와 어느 계정에서 운영할지는 미정이다([DOC-013 worklog](docs/worklogs/2026-11-25.md#doc-013-개인-프로젝트-전환)). 그동안은 [서버 없이 AI·로컬 2인 실행](#서버-없이-ai로컬-2인-실행)으로 플레이한다.
+2026-11-26 사용자 본인 계정의 새 구성으로 운영을 다시 열기로 했다([DEC-098](docs/DECISIONS.md#결정-색인), [ADR-0005](docs/adr/0005-hosting-and-data.md)): HostHatch VM에 서버·DB를 두고 자체 도메인(Cloudflare)으로 연결하며, itch.io를 시작으로 게임 포털에도 제출한다([DEC-097](docs/DECISIONS.md#결정-색인)). 주소는 구축([OPS-004](docs/TASKS.md#ops-004-운영-서버-구축)) 뒤 여기에 적는다. 배포·백업·모니터링 절차는 [OPERATIONS](docs/design/OPERATIONS.md)를 따른다. 그동안은 [서버 없이 AI·로컬 2인 실행](#서버-없이-ai로컬-2인-실행)으로 플레이한다.
 
 ## 출처
 
